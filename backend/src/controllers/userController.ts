@@ -10,7 +10,7 @@ const generateToken = (id: string) => {
 // @desc Register a new user
 // @route POST /api/users
 // @access Public
-export const registerUser = asyncHandler(async (req, res) => {
+export const signUpUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
