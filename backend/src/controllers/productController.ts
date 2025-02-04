@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { AuthRequest } from "../middleware/authMiddleware";
-import Product from "../models/Product";
+import Product from "../models/productModel";
 
 export const getProducts = asyncHandler(async (req: AuthRequest, res) => {
   const products = await Product.find({});

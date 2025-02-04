@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import productRoutes from "./routes/productRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import userRoutes from "./routes/userRoutes";
+import cartRoutes from "./routes/cartRoutes";
 
 dotenv.config();
 
@@ -29,7 +30,8 @@ connectDB();
 // Routes
 app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
