@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import productRoutes from "./routes/productRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import userRoutes from "./routes/userRoutes";
 
 dotenv.config();
 
@@ -12,7 +13,6 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/api/admin", adminRoutes);
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -28,6 +28,8 @@ connectDB();
 
 // Routes
 app.use("/api/products", productRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
