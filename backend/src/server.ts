@@ -2,10 +2,13 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import productRoutes from "./routes/productRoutes";
-import adminRoutes from "./routes/adminRoutes";
-import userRoutes from "./routes/userRoutes";
-import cartRoutes from "./routes/cartRoutes";
+import {
+  orderRoutes,
+  productRoutes,
+  adminRoutes,
+  userRoutes,
+  cartRoutes,
+} from "./routes";
 
 dotenv.config();
 
@@ -32,6 +35,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

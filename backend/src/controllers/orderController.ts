@@ -1,17 +1,20 @@
 import asyncHandler from "express-async-handler";
+import { UserRequest } from "../utils/utils";
 import Order from "../models/orderModel";
 import Cart from "../models/cartModel";
 
 // 🔹 Get All Orders for Logged-in User
-export const getOrders = asyncHandler(async (req, res) => {
-  const { user } = req.body;
-  const orders = await Order.find({ user: user.id }).populate("items.product");
+export const getOrders = asyncHandler(async (req: UserRequest, res) => {
+  const user = req.user;
+  const orders = await Order.find({ user: user.id }).populate(
+    "items.productId"
+  );
   res.json(orders);
 });
 
 // 🔹 Place Order (Checkout)
-export const placeOrder = asyncHandler(async (req, res) => {
-  const { user } = req.body;
+export const placeOrder = asyncHandler(async (req: UserRequest, res) => {
+  const user = req.user;
   const cart = await Cart.findOne({ user: user.id }).populate("items.product");
 
   if (!cart || cart.items.length === 0) {
