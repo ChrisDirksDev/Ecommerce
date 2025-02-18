@@ -14,6 +14,7 @@ const Navbar = () => {
         <li><Link to="/cart">Cart</Link></li>
         <li><Link to="/checkout">Checkout</Link></li>
         <li><Link to="/orders">Orders</Link></li>
+        <li><Link to="/admin/dashboard">Admin</Link></li>
         {user ? (
           <li>
             <button onClick={() => setShowConfirm(true)} className="text-red-500">Logout</button>

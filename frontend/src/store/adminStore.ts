@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import { loginAdmin } from "../utils/api";
 
 interface AdminState {
   admin: { token: string } | null;
@@ -11,10 +11,7 @@ export const useAdminStore = create<AdminState>((set) => ({
   admin: JSON.parse(localStorage.getItem("admin") || "null"),
 
   login: async (email, password) => {
-    const { data } = await axios.post(`$/admin/login`, {
-      email,
-      password,
-    });
+    const data = await loginAdmin(email, password);
     localStorage.setItem("admin", JSON.stringify(data));
     set({ admin: data });
   },

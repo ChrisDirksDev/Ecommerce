@@ -95,3 +95,11 @@ export const clearCart = async (token: string): Promise<Cart> => {
   );
   return response.data;
 };
+
+export const loginAdmin = async (
+  email: string,
+  password: string
+): Promise<User> => {
+  const response = await axios.post("/admin/login", { email, password });
+  return response.data;
+};

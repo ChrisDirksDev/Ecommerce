@@ -7,6 +7,37 @@ const generateToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "30d" });
 };
 
+export const registerAdmin = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const adminExists = await Admin.findOne({ email });
+
+  if (adminExists) {
+    res.status(400);
+    throw new Error("Admin already exists");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const admin = await Admin.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
+
+  if (admin) {
+    res.status(201).json({
+      _id: admin.id,
+      name: admin.name,
+      email: admin.email,
+      token: generateToken(admin.id),
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid admin data");
+  }
+});
+
 // @desc Admin login
 // @route POST /api/admin/login
 // @access Public
