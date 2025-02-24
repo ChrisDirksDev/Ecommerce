@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const adminSchema = new mongoose.Schema(
   {
@@ -8,5 +8,7 @@ const adminSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+export type IAdmin = InferSchemaType<typeof adminSchema>;
 
 export default mongoose.model("Admin", adminSchema);

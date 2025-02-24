@@ -2,25 +2,31 @@ import asyncHandler from "express-async-handler";
 import User from "../models/userModel";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
+import { Request, Response } from "express";
 
-const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "30d" });
+const generateToken = (id: string): string => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("Missing JWT_SECRET in environment variables");
+  }
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
-// @desc Register a new user
-// @route POST /api/user
-// @access Public
-export const signUpUser = asyncHandler(async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
-    return;
-  }
-
-  try {
+/**
+ * Handles user sign-up requests.
+ *
+ * This function validates the incoming request against the `signUpSchema`,
+ * checks if a user with the provided email already exists, hashes the password,
+ * creates a new user, and returns the user data along with a generated token.
+ *
+ * @param req - The request object containing user sign-up data.
+ * @param res - The response object used to send back the appropriate HTTP response.
+ * @returns A promise that resolves to void.
+ *
+ * @throws {Error} If there is an issue with user creation or validation.
+ */
+export const signUpUser = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
-
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -29,53 +35,46 @@ export const signUpUser = asyncHandler(async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, email, password: hashedPassword });
 
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
+    res.status(201).json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user.id),
     });
-
-    if (user) {
-      res.status(201).json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user.id),
-      });
-    } else {
-      res.status(400);
-      throw new Error("Invalid user data");
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
   }
-});
+);
 
-// @desc Auth user & get token
-// @route POST /api/users/login
-// @access Public
-export const loginUser = asyncHandler(async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) res.status(400).json({ errors: errors.array() });
-
-  try {
+/**
+ * Handles user login.
+ *
+ * This function validates the login request, checks the user's credentials,
+ * and returns a JSON response with the user's details and a generated token.
+ *
+ * @param req - The request object containing the user's login details.
+ * @param res - The response object used to send back the appropriate response.
+ *
+ * @returns A promise that resolves to void.
+ *
+ * @throws {400} If the request validation fails.
+ * @throws {401} If the user's credentials are invalid.
+ */
+export const loginUser = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user.id),
-      });
-    } else {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       res.status(401);
       throw new Error("Invalid credentials");
     }
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
+
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user.id),
+    });
   }
-});
+);

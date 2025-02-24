@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const ItemSchema = new mongoose.Schema(
   {
-    productId: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: true,
@@ -12,17 +12,7 @@ const ItemSchema = new mongoose.Schema(
   { _id: false } // Optional: Prevents auto-generating _id for each item
 );
 
-// Virtual field to rename `productId` to `product`
-ItemSchema.virtual("product", {
-  ref: "Product",
-  localField: "productId",
-  foreignField: "_id",
-  justOne: true,
-});
-
-// Enable virtuals for JSON & Object conversion
-ItemSchema.set("toJSON", { virtuals: true });
-ItemSchema.set("toObject", { virtuals: true });
+export type ICartItem = InferSchemaType<typeof ItemSchema>;
 
 const CartSchema = new mongoose.Schema(
   {
@@ -35,5 +25,7 @@ const CartSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+export type ICart = InferSchemaType<typeof CartSchema>;
 
 export default mongoose.model("Cart", CartSchema);

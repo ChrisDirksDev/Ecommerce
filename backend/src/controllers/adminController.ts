@@ -25,17 +25,12 @@ export const registerAdmin = asyncHandler(async (req, res) => {
     password: hashedPassword,
   });
 
-  if (admin) {
-    res.status(201).json({
-      _id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      token: generateToken(admin.id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Invalid admin data");
-  }
+  res.status(201).json({
+    _id: admin.id,
+    name: admin.name,
+    email: admin.email,
+    token: generateToken(admin.id),
+  });
 });
 
 // @desc Admin login

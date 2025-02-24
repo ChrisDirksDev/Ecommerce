@@ -4,22 +4,20 @@ import Order from "../models/orderModel";
 import Cart from "../models/cartModel";
 
 // 🔹 Get All Orders for Logged-in User
-export const getOrders = asyncHandler(async (req: UserRequest, res) => {
-  const user = req.user;
-  const orders = await Order.find({ user: user.id }).populate(
-    "items.productId"
-  );
+export const getOrders = asyncHandler(async (req, res) => {
+  const user = (req as UserRequest).user;
+  const orders = await Order.find({ user: user._id });
   res.json(orders);
 });
 
 // 🔹 Place Order (Checkout)
-export const placeOrder = asyncHandler(async (req: UserRequest, res) => {
-  const user = req.user;
-  const cart = await Cart.findOne({ user: user.id }).populate("items.product");
+export const placeOrder = asyncHandler(async (req, res) => {
+  const user = (req as UserRequest).user;
+  let cart = await Cart.findOne({ user: user._id }).populate("items.product");
 
   if (!cart || cart.items.length === 0) {
-    res.status(400).json({ message: "Cart is empty" });
-    return;
+    res.status(400);
+    throw new Error("Cart is empty");
   }
 
   const totalPrice = cart.items
@@ -31,30 +29,33 @@ export const placeOrder = asyncHandler(async (req: UserRequest, res) => {
     );
 
   const newOrder = new Order({
-    user: user.id,
-    items: cart.items,
+    user: user._id,
+    items: cart.items.map((item) => ({
+      product: item.product._id,
+      quantity: item.quantity,
+    })),
     totalPrice,
     paymentStatus: "pending",
     status: "pending",
   });
 
   await newOrder.save();
-  await Cart.deleteOne({ user: user.id });
+  await Cart.deleteOne({ user: user._id });
 
   res.status(201).json(newOrder);
 });
 
 // 🔹 Get Order by ID
 export const getOrderById = asyncHandler(async (req, res) => {
-  const { user } = req.body;
+  const user = (req as UserRequest).user;
   const order = await Order.findOne({
     _id: req.params.orderId,
-    user: user.id,
-  }).populate("items.product");
+    user: user._id,
+  });
 
   if (!order) {
-    res.status(404).json({ message: "Order not found" });
-    return;
+    res.status(404);
+    throw new Error("Order not found");
   }
 
   res.json(order);
@@ -62,17 +63,17 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 // 🔹 Update Order Status (Admin Only)
 export const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { user } = req.body;
-  if (user.role !== "admin") {
-    res.status(403).json({ message: "Access denied" });
-    return;
+  const user = (req as UserRequest).user;
+  if (!user.admin) {
+    res.status(403);
+    throw new Error("Not authorized as an admin");
   }
 
   const order = await Order.findById(req.params.orderId);
 
   if (!order) {
-    res.status(404).json({ message: "Order not found" });
-    return;
+    res.status(404);
+    throw new Error("Order not found");
   }
 
   order.status = req.body.status || order.status;

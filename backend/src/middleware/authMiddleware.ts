@@ -8,7 +8,7 @@ export interface AuthRequest extends Request {
 }
 
 // Middleware to protect admin routes
-export const protectAdmin = async (
+export const adminAuth = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -24,26 +24,23 @@ export const protectAdmin = async (
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
         id: string;
       };
-
       req.admin = await Admin.findById(decoded.id).select("-password");
       next();
     } catch (error) {
-      res.status(401);
-      throw new Error("Not authorized, token failed");
+      res.status(401).send("Not authorized, token failed");
     }
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error("Not authorized, no token");
+    res.status(401).send("Not authorized, no token");
   }
 };
 
 export interface UserAuthRequest extends Request {
-  user?: { id: string };
+  user?: { _id: string; admin?: boolean };
 }
 // Middleware to check if user is authenticated
-export const isAuthenticated = async (
+export const userAuth = async (
   req: UserAuthRequest,
   res: Response,
   next: NextFunction
@@ -57,19 +54,18 @@ export const isAuthenticated = async (
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        id: string;
+        _id: string;
       };
 
       req.user = decoded;
+      req.user.admin = false;
       next();
     } catch (error) {
-      res.status(401);
-      throw new Error("Not authorized, token failed");
+      res.status(401).send("Not authorized, token failed");
     }
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error("Not authorized, no token");
+    res.status(401).send("Not authorized, no token");
   }
 };

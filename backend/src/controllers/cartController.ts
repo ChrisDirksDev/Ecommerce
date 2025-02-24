@@ -1,100 +1,93 @@
 import asyncHandler from "express-async-handler";
-import Cart from "../models/cartModel";
+import { Cart, IProduct } from "models";
 import { UserRequest } from "../utils/utils";
 
 /**
  * Retrieves the cart for the authenticated user.
  *
- * @param {UserRequest} req - The request object, containing the authenticated user.
- * @param {Response} res - The response object used to send back the cart data.
- * @returns {Promise<void>} - A promise that resolves when the cart data is sent in the response.
+ * This function uses an asynchronous handler to fetch the cart details
+ * for the user making the request. It populates the cart with relevant
+ * information and sends it back as a JSON response.
+ *
+ * @param req - The request object, extended to include the authenticated user.
+ * @param res - The response object used to send back the cart data.
+ * @returns A promise that resolves to void.
  */
-export const getCart = asyncHandler(async (req: UserRequest, res) => {
-  const user = req.user;
-
+export const getCart = asyncHandler(async (req, res): Promise<void> => {
+  const user = (req as UserRequest).user;
   const cart = await getPopulatedCart(user);
-
   res.json(cart);
 });
 
 /**
- * Adds a product to the user's cart. If the cart already exists, it updates the quantity of the product if it is already in the cart,
- * or adds the product to the cart if it is not. If the cart does not exist, it creates a new cart with the product.
+ * Adds a product to the user's cart. If the product already exists in the cart,
+ * it increments the quantity. If the product does not exist, it adds the product
+ * with the specified quantity.
  *
- * @param {UserRequest} req - The request object containing the user and the product details.
- * @param {Object} req.body - The body of the request.
- * @param {string} req.body.productId - The ID of the product to add to the cart.
- * @param {number} [req.body.quantity=1] - The quantity of the product to add to the cart.
- * @param {Object} res - The response object.
- *
- * @returns {Promise<void>} - A promise that resolves to void.
+ * @param req - The request object containing the product ID and quantity in the body.
+ * @param res - The response object used to send back the updated cart.
+ * @returns void
  */
-export const addToCart = asyncHandler(async (req: UserRequest, res) => {
-  const { productId, quantity = 1 } = req.body;
-  const user = req.user;
-  const cart = await Cart.findOne({ user: user.id });
+export const addToCart = asyncHandler(async (req, res): Promise<void> => {
+  const { product, quantity } = req.body;
+  const user = (req as UserRequest).user;
 
-  if (cart) {
-    const item = cart.items.find(
-      (item: { productId: any }) => item.productId == productId
+  let cart = await Cart.findOneAndUpdate(
+    { user: user._id, "items.product": product },
+    { $inc: { "items.$.quantity": quantity } },
+    { new: true }
+  );
+
+  if (!cart) {
+    await Cart.findOneAndUpdate(
+      { user: user._id },
+      { $push: { items: { product, quantity } } },
+      { new: true, upsert: true }
     );
-
-    if (item) {
-      item.quantity += quantity;
-    } else {
-      cart.items.push({ productId, quantity });
-    }
-
-    await cart.save();
-    const populatedCart = await getPopulatedCart(user);
-    res.json(populatedCart);
-  } else {
-    const newCart = await Cart.create({
-      user: user.id,
-      items: [{ productId, quantity }],
-    });
-    res.status(201).json(newCart);
   }
+
+  res.json(await getPopulatedCart(user));
 });
 
 /**
- * Removes a product from the user's cart.
+ * Removes a product from the user's cart. If the product's quantity is greater than one,
+ * it decrements the quantity by one. If the product's quantity is one, it removes the product
+ * from the cart.
  *
- * @param {UserRequest} req - The request object containing the user and product ID.
- * @param {Response} res - The response object to send the result.
- * @throws {Error} If the cart is not found.
+ * @param req - Express request object, expected to contain `params.productId` and `user` in the request object.
+ * @param res - Express response object used to send the response.
+ * @returns A promise that resolves to void.
  *
- * @returns {Promise<void>} A promise that resolves when the product is removed from the cart.
+ * @throws 404 error if the cart or item is not found.
  */
-export const removeFromCart = asyncHandler(async (req: UserRequest, res) => {
+export const removeFromCart = asyncHandler(async (req, res): Promise<void> => {
   const { productId } = req.params;
-  const user = req.user;
-  const cart = await Cart.findOne({ user: user.id });
+  const user = (req as UserRequest).user;
 
-  if (cart) {
-    const item = cart.items.find(
-      (item: { productId: any }) => item.productId == productId
-    );
-
-    if (item) {
-      if (item.quantity > 1) {
-        item.quantity -= 1;
-      } else {
-        cart.items = cart.items
-          .toObject()
-          .filter((item: { productId: any }) => item.productId != productId);
-      }
-    } else {
-      throw new Error("Item not found in cart");
-    }
-
-    await cart.save();
-    const populatedCart = await getPopulatedCart(user);
-    res.json(populatedCart);
-  } else {
+  const cart = await Cart.findOne({ user: user._id });
+  if (!cart) {
     res.status(404);
     throw new Error("Cart not found");
   }
+
+  // Decrement the quantity of the item
+  const result = await Cart.updateOne(
+    { user: user._id, "items.product": productId },
+    { $inc: { "items.$.quantity": -1 } }
+  );
+
+  if (result.modifiedCount === 0) {
+    res.status(404);
+    throw new Error("Item not found in cart");
+  }
+
+  // Remove the item if its quantity is zero
+  await Cart.updateOne(
+    { user: user._id },
+    { $pull: { items: { product: productId, quantity: { $lte: 0 } } } }
+  );
+
+  res.json(await getPopulatedCart(user));
 });
 
 /**
@@ -102,52 +95,64 @@ export const removeFromCart = asyncHandler(async (req: UserRequest, res) => {
  *
  * This function handles the updating of the cart items for the user making the request.
  * It expects the request body to contain the new items for the cart.
- * If the cart exists for the user, it updates the cart with the new items and saves it.
- * Then, it returns the populated cart as a JSON response.
- * If the cart does not exist, it responds with a 404 status and an error message.
+ * If the cart does not exist for the user, it responds with a 404 status and an error message.
+ * Otherwise, it updates the cart with the new items and saves it.
+ * Finally, it responds with the updated and populated cart.
  *
- * @param req - The request object, containing the user and the new cart items.
- * @param res - The response object, used to send the JSON response or error message.
- * @throws Will throw an error if the cart is not found.
+ * @param req - The request object, expected to contain the user and the new cart items.
+ * @param res - The response object, used to send back the updated cart or an error message.
+ * @returns void
  */
-export const updateCart = asyncHandler(async (req: UserRequest, res) => {
+export const updateCart = asyncHandler(async (req, res): Promise<void> => {
   const { items } = req.body;
-  const user = req.user;
-  const cart = await Cart.findOne({ user: user.id });
+  const user = (req as UserRequest).user;
 
-  if (cart) {
-    cart.items = items;
-    await cart.save();
-    const populatedCart = await getPopulatedCart(user);
-    res.json(populatedCart);
-  } else {
+  const cart = await Cart.findOne({ user: user._id });
+  if (!cart) {
     res.status(404);
     throw new Error("Cart not found");
   }
+
+  cart.items = items;
+  await cart.save();
+  res.json(await getPopulatedCart(user));
 });
 
+interface PopulatedCartItem {
+  product: IProduct;
+  quantity: number;
+}
+
 /**
- * Retrieves a user's cart from the database, creating a new cart if one does not exist.
- * The cart is populated with product details for each item.
+ * Retrieves and populates the cart for a given user. If the cart does not exist, it creates a new one.
  *
- * @param {any} user - The user object containing the user's ID.
- * @returns {Promise<Cart>} - A promise that resolves to the user's populated cart.
+ * @param user - An object containing the user's ID.
+ * @returns A promise that resolves to the populated cart with a total price of all items.
+ *
+ * @remarks
+ * - The cart is populated with the product details for each item.
+ * - The total price is calculated based on the price and quantity of each item in the cart.
+ *
+ * @example
+ * ```typescript
+ * const user = { _id: "userId123" };
+ * const cart = await getPopulatedCart(user);
+ * console.log(cart.total); // Outputs the total price of the cart
+ * ```
  */
-const getPopulatedCart = async (user: any) => {
+const getPopulatedCart = async (user: { _id: string }) => {
   const cart = await Cart.findOneAndUpdate(
-    { user: user?.id }, // Search by user ID
-    { $setOnInsert: { user: user?.id, items: [] } }, // Create new cart if not found
-    { new: true, upsert: true } // Return the updated/new document
-  ).populate("items.productId");
+    { user: user._id },
+    { $setOnInsert: { user: user._id, items: [] } },
+    { new: true, upsert: true }
+  )
+    .populate<{ items: PopulatedCartItem[] }>("items.product")
+    .lean();
 
-  // Calculate cart total
-  const total = cart.items
-    .toObject()
-    .reduce(
-      (sum: number, item: any) =>
-        sum + (item.product.price || 0) * item.quantity,
-      0
-    );
+  const total = cart.items.reduce(
+    (sum, item) => sum + (item.product.price || 0) * item.quantity,
+    0
+  );
 
-  return { ...cart.toObject(), total };
+  return { ...cart, total };
 };

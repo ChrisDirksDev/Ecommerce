@@ -1,7 +1,9 @@
-import adminModel from "./adminModel";
-import userModel from "./userModel";
-import productModel from "./productModel";
-import orderModel from "./orderModel";
-import cartModel from "./cartModel";
+import Admin, { IAdmin } from "./adminModel";
+import User, { IUser } from "./userModel";
+import Product, { IProduct } from "./productModel";
+import Order, { IOrder } from "./orderModel";
+import Cart, { ICart, ICartItem } from "./cartModel";
 
-export { adminModel, userModel, productModel, orderModel, cartModel };
+export { Admin, User, Product, Order, Cart };
+
+export { IAdmin, IUser, IProduct, IOrder, ICart, ICartItem };

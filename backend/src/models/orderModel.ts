@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const OrderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     items: [
       {
-        productId: {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
@@ -27,5 +27,7 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+export type IOrder = InferSchemaType<typeof OrderSchema>;
 
 export default mongoose.model("Order", OrderSchema);

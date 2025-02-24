@@ -5,12 +5,23 @@ import {
   removeFromCart,
   updateCart,
 } from "../controllers/cartController";
-import { isAuthenticated } from "../middleware/authMiddleware";
+import { userAuth } from "../middleware/authMiddleware";
+import {
+  validateBody,
+  validateParams,
+} from "../middleware/validationMiddleware";
+import { cartItemSchema, cartSchema, productIdSchema } from "utils/utils";
 
 const router = express.Router();
-router.get("/", isAuthenticated, getCart);
-router.post("/add", isAuthenticated, addToCart);
-router.delete("/remove/:productId", isAuthenticated, removeFromCart);
-router.put("/update", isAuthenticated, updateCart);
+
+router.get("/", userAuth, getCart);
+router.post("/items", userAuth, validateBody(cartItemSchema), addToCart);
+router.delete(
+  "/items/:productId",
+  userAuth,
+  validateParams(productIdSchema),
+  removeFromCart
+);
+router.put("/items", userAuth, validateBody(cartSchema), updateCart);
 
 export default router;
