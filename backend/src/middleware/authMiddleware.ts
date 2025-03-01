@@ -37,7 +37,7 @@ export const adminAuth = async (
 };
 
 export interface UserAuthRequest extends Request {
-  user?: { _id: string; admin?: boolean };
+  user?: { _id?: string; uuid?: string; admin?: boolean };
 }
 // Middleware to check if user is authenticated
 export const userAuth = async (
@@ -59,13 +59,16 @@ export const userAuth = async (
 
       req.user = decoded;
       req.user.admin = false;
-      next();
+      return next();
     } catch (error) {
       res.status(401).send("Not authorized, token failed");
     }
   }
 
-  if (!token) {
-    res.status(401).send("Not authorized, no token");
+  if (req.headers["x-anon-user-id"]) {
+    req.user = { uuid: req.headers["x-anon-user-id"] as string, admin: false };
+    return next();
   }
+
+  res.status(401).send("Authentication required");
 };

@@ -7,7 +7,7 @@ import {
   updateOrderStatus,
 } from "../controllers/orderController";
 import { validateBody, validateParams } from "middleware/validationMiddleware";
-import { orderIdParamsSchema, updateOrderBodySchema } from "utils/utils";
+import { orderIdParamsSchema, updateOrderBodySchema } from "utils/schemas";
 
 const router = express.Router();
 

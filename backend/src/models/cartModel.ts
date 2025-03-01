@@ -9,7 +9,7 @@ const ItemSchema = new mongoose.Schema(
     },
     quantity: { type: Number, required: true, min: 1 },
   },
-  { _id: false } // Optional: Prevents auto-generating _id for each item
+  { _id: false }
 );
 
 export type ICartItem = InferSchemaType<typeof ItemSchema>;
@@ -19,9 +19,14 @@ const CartSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
-    items: [ItemSchema], // Use the new ItemSchema
+    anonId: {
+      type: String,
+      required: false,
+      index: true, // Helps with lookup performance
+    },
+    items: [ItemSchema], // List of cart items
   },
   { timestamps: true }
 );

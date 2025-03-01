@@ -10,7 +10,7 @@ import {
   validateBody,
   validateParams,
 } from "../middleware/validationMiddleware";
-import { cartItemSchema, cartSchema, productIdSchema } from "utils/utils";
+import { cartItemSchema, cartSchema, productIdSchema } from "utils/schemas";
 
 const router = express.Router();
 

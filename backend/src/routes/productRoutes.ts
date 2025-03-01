@@ -17,7 +17,7 @@ import {
   getProductsSchema,
   updateProductBodySchema,
   updateProductParamsSchema,
-} from "utils/utils";
+} from "utils/schemas";
 
 const router = express.Router();
 

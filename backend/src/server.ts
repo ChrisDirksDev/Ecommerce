@@ -9,6 +9,7 @@ import {
   adminRoutes,
   userRoutes,
   cartRoutes,
+  anonUserRoutes,
 } from "./routes";
 import errorHandler from "./middleware/errorMiddleware";
 
@@ -27,6 +28,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/anon", anonUserRoutes);
 app.use(errorHandler);
 
 app.get("/", (req, res) => {

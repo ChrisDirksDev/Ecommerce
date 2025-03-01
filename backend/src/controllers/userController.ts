@@ -1,15 +1,8 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/userModel";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { generateToken } from "../utils/utils";
 import { Request, Response } from "express";
-
-const generateToken = (id: string): string => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("Missing JWT_SECRET in environment variables");
-  }
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
 
 /**
  * Handles user sign-up requests.
