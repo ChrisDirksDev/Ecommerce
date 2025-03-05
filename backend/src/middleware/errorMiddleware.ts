@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { AppError } from "utils/func";
 
 // Global error handler
 const errorHandler = (
@@ -7,7 +8,8 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let statusCode =
+    err instanceof AppError && err.statusCode ? err.statusCode : 500;
   res.status(statusCode).json({
     message: err.message,
     stack: process.env.NODE_ENV === "production" ? null : err.stack,

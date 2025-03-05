@@ -26,7 +26,8 @@ const CartSchema = new mongoose.Schema(
       required: false,
       index: true, // Helps with lookup performance
     },
-    items: [ItemSchema], // List of cart items
+    // make required
+    items: { type: [ItemSchema], required: true, default: [] },
   },
   { timestamps: true }
 );

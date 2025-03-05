@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Admin from "../models/adminModel";
-import User from "../models/userModel";
+import { UserRequest } from "utils/func";
 
 export interface AuthRequest extends Request {
   admin?: any;
@@ -36,12 +36,9 @@ export const adminAuth = async (
   }
 };
 
-export interface UserAuthRequest extends Request {
-  user?: { _id?: string; uuid?: string; admin?: boolean };
-}
 // Middleware to check if user is authenticated
 export const userAuth = async (
-  req: UserAuthRequest,
+  req: UserRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -54,7 +51,7 @@ export const userAuth = async (
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        _id: string;
+        id: string;
       };
 
       req.user = decoded;
@@ -66,7 +63,10 @@ export const userAuth = async (
   }
 
   if (req.headers["x-anon-user-id"]) {
-    req.user = { uuid: req.headers["x-anon-user-id"] as string, admin: false };
+    req.user = {
+      anonId: req.headers["x-anon-user-id"] as string,
+      admin: false,
+    };
     return next();
   }
 

@@ -1,8 +1,8 @@
 import asyncHandler from "express-async-handler";
-import User from "../models/userModel";
-import bcrypt from "bcryptjs";
-import { generateToken } from "../utils/utils";
+
+import { UserRequest } from "../utils/types";
 import { Request, Response } from "express";
+import { authUser, registerUser } from "services/userServices";
 
 /**
  * Handles user sign-up requests.
@@ -20,22 +20,10 @@ import { Request, Response } from "express";
 export const signUpUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
-    const userExists = await User.findOne({ email });
+    const { user } = req as UserRequest;
+    const newUser = registerUser(name, email, password, user);
 
-    if (userExists) {
-      res.status(400);
-      throw new Error("User already exists");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
-
-    res.status(201).json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user.id),
-    });
+    res.status(201).json(newUser);
   }
 );
 
@@ -50,24 +38,14 @@ export const signUpUser = asyncHandler(
  *
  * @returns A promise that resolves to void.
  *
- * @throws {400} If the request validation fails.
  * @throws {401} If the user's credentials are invalid.
  */
 export const loginUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { user } = req as UserRequest;
+    const authedUser = await authUser(email, password, user);
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      res.status(401);
-      throw new Error("Invalid credentials");
-    }
-
-    res.json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user.id),
-    });
+    res.json(authedUser);
   }
 );

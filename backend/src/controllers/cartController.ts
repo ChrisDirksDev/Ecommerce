@@ -1,6 +1,11 @@
 import asyncHandler from "express-async-handler";
-import { Cart, IProduct } from "models";
-import { UserRequest, userQuery } from "../utils/utils";
+import { extractUserFromRequest } from "../utils/func";
+import {
+  addProductToCart,
+  fetchCart,
+  removeProductFromCart,
+  updateProductInCart,
+} from "services/cartService";
 
 /**
  * Retrieves the cart for the authenticated user.
@@ -14,8 +19,9 @@ import { UserRequest, userQuery } from "../utils/utils";
  * @returns A promise that resolves to void.
  */
 export const getCart = asyncHandler(async (req, res): Promise<void> => {
-  const user = (req as UserRequest).user;
-  const cart = await getPopulatedCart(user);
+  const user = extractUserFromRequest(req);
+  const cart = await fetchCart(user);
+
   res.json(cart);
 });
 
@@ -30,23 +36,10 @@ export const getCart = asyncHandler(async (req, res): Promise<void> => {
  */
 export const addToCart = asyncHandler(async (req, res): Promise<void> => {
   const { product, quantity } = req.body;
-  const user = (req as UserRequest).user;
+  const user = extractUserFromRequest(req);
+  const cart = await addProductToCart(user, product, quantity);
 
-  let cart = await Cart.findOneAndUpdate(
-    { ...userQuery(user), "items.product": product },
-    { $inc: { "items.$.quantity": quantity } },
-    { new: true }
-  );
-
-  if (!cart) {
-    await Cart.findOneAndUpdate(
-      userQuery(user),
-      { $push: { items: { product, quantity } } },
-      { new: true, upsert: true }
-    );
-  }
-
-  res.json(await getPopulatedCart(user));
+  res.json(cart);
 });
 
 /**
@@ -62,31 +55,10 @@ export const addToCart = asyncHandler(async (req, res): Promise<void> => {
  */
 export const removeFromCart = asyncHandler(async (req, res): Promise<void> => {
   const { productId } = req.params;
-  const user = (req as UserRequest).user;
+  const user = extractUserFromRequest(req);
+  const cart = await removeProductFromCart(user, productId);
 
-  const cart = await Cart.findOne(userQuery(user));
-  if (!cart) {
-    res.status(404);
-    throw new Error("Cart not found");
-  }
-
-  // Decrement the quantity of the item
-  const result = await Cart.updateOne(
-    { ...userQuery(user), "items.product": productId },
-    { $inc: { "items.$.quantity": -1 } }
-  );
-
-  if (result.modifiedCount === 0) {
-    res.status(404);
-    throw new Error("Item not found in cart");
-  }
-
-  // Remove the item if its quantity is zero
-  await Cart.updateOne(userQuery(user), {
-    $pull: { items: { product: productId, quantity: { $lte: 0 } } },
-  });
-
-  res.json(await getPopulatedCart(user));
+  res.json(cart);
 });
 
 /**
@@ -103,61 +75,11 @@ export const removeFromCart = asyncHandler(async (req, res): Promise<void> => {
  * @returns void
  */
 export const updateCart = asyncHandler(async (req, res): Promise<void> => {
-  const { items } = req.body;
-  const user = (req as UserRequest).user;
+  const { productId } = req.params;
+  const { quantity } = req.body;
+  const user = extractUserFromRequest(req);
 
-  const cart = await Cart.findOne(userQuery(user));
-  if (!cart) {
-    res.status(404);
-    throw new Error("Cart not found");
-  }
+  const cart = updateProductInCart(user, productId, quantity);
 
-  cart.items = items;
-  await cart.save();
-  res.json(await getPopulatedCart(user));
+  res.json(cart);
 });
-
-interface PopulatedCartItem {
-  product: IProduct;
-  quantity: number;
-}
-
-/**
- * Retrieves and populates the cart for a given user. If the cart does not exist, it creates a new one.
- *
- * @param user - An object containing the user's ID.
- * @returns A promise that resolves to the populated cart with a total price of all items.
- *
- * @remarks
- * - The cart is populated with the product details for each item.
- * - The total price is calculated based on the price and quantity of each item in the cart.
- *
- * @example
- * ```typescript
- * const user = { _id: "userId123" };
- * const cart = await getPopulatedCart(user);
- * console.log(cart.total); // Outputs the total price of the cart
- * ```
- */
-const getPopulatedCart = async (user: { _id: string; uuid: string }) => {
-  const cart = await Cart.findOneAndUpdate(
-    userQuery(user),
-    {
-      $setOnInsert: {
-        user: user._id || null,
-        anonId: user.uuid || null,
-        items: [],
-      },
-    },
-    { new: true, upsert: true }
-  )
-    .populate<{ items: PopulatedCartItem[] }>("items.product")
-    .lean();
-
-  const total = cart.items.reduce(
-    (sum, item) => sum + (item.product.price || 0) * item.quantity,
-    0
-  );
-
-  return { ...cart, total };
-};

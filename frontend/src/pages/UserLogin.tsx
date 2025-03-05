@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useUserStore } from "../store/userStore";
+import { authUser } from "../services/userService";
 
 
 const UserLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useUserStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      navigate('/user/dashboard');
-    } catch (error) {
+      await authUser(email, password);
+      navigate('/');
+    } catch {
       alert('Invalid login');
     }
   };

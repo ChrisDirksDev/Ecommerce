@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { registerUser } from "../utils/api";
+import { authUser, registerUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../store/userStore";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +9,6 @@ const Signup = () => {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const { login } = useUserStore();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +21,7 @@ const Signup = () => {
 
     try {
       await registerUser(formData);
-      await login(formData.email, formData.password);
+      await authUser(formData.email, formData.password);
       navigate("/");
     } catch (err: any) {
       setError(err.response?.data?.message || "Signup failed");

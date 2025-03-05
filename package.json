@@ -7,6 +7,10 @@
     "fulldev": "concurrently \"npm run server\" \"npm run client\""
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "uuid": "^11.1.0"
   }
 }

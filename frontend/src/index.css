@@ -1,1 +1,17 @@
-@tailwind utilities;
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

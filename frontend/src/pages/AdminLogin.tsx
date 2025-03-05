@@ -1,20 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAdminStore } from "../store/adminStore";
 import { useNavigate } from "react-router-dom";
+import { AuthAdmin } from "../services/adminService";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const login = useAdminStore((state) => state.login);
+  const admin = useAdminStore((state) => state.admin);
   const navigate = useNavigate();
+
+
+  useEffect(() => {
+    if (admin) {
+      navigate("/admin/dashboard");
+    }
+  }
+    , [admin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await AuthAdmin(email, password);
       navigate("/admin/dashboard");
     } catch (error) {
-      alert("Invalid login");
+      console.error("Error logging in:", error);
     }
   };
 

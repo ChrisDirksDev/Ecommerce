@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchProductById } from "../utils/api";
-import { Product } from "../types/types";
+import { getProductById } from "../api/products";
+import { Product } from "../types";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -9,7 +9,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchProductById(id).then(setProduct);
+      getProductById(id).then(setProduct);
     }
   }, [id]);
 

@@ -1,7 +1,8 @@
 import asyncHandler from "express-async-handler";
 import { AuthRequest } from "../middleware/authMiddleware";
 import Product from "../models/productModel";
-import Joi from "joi";
+import * as service from "services/productService";
+import { AppError } from "utils/error";
 
 /**
  * Retrieves a paginated list of products.
@@ -18,10 +19,7 @@ export const getProducts = asyncHandler(async (req: AuthRequest, res) => {
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find({})
-    .sort({ createdAt: 1, name: 1 })
-    .skip(skip)
-    .limit(limit);
+  const products = await service.fetchProducts(skip, limit);
   res.json(products);
 });
 
@@ -41,12 +39,12 @@ export const getProducts = asyncHandler(async (req: AuthRequest, res) => {
 export const createProduct = asyncHandler(async (req: AuthRequest, res) => {
   const { name, price, description, imageUrl } = req.body;
 
-  const product = await Product.create({
+  const product = await service.createProduct(
     name,
     price,
     description,
-    imageUrl,
-  });
+    imageUrl
+  );
   res.status(201).json(product);
 });
 
@@ -63,18 +61,22 @@ export const createProduct = asyncHandler(async (req: AuthRequest, res) => {
  * @throws {Error} If the product is not found.
  */
 export const updateProduct = asyncHandler(async (req: AuthRequest, res) => {
-  const product = await Product.findById(req.params.id);
+  const { id } = req.params;
+  const product = await Product.findById(id);
 
   if (!product) {
-    res.status(404);
-    throw new Error("Product not found");
+    throw new AppError("Product not found", 404);
   }
 
-  const updatedProduct = await Product.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true }
+  const { name, price, description, imageUrl } = req.body;
+  const updatedProduct = await service.updateProduct(
+    id,
+    name,
+    price,
+    description,
+    imageUrl
   );
+
   res.json(updatedProduct);
 });
 
@@ -91,13 +93,12 @@ export const updateProduct = asyncHandler(async (req: AuthRequest, res) => {
  * @throws {Error} If the product is not found.
  */
 export const deleteProduct = asyncHandler(async (req: AuthRequest, res) => {
-  const product = await Product.findById(req.params.id);
+  const { id } = req.params;
+  const product = await service.deleteProduct(id);
 
   if (!product) {
-    res.status(404);
-    throw new Error("Product not found");
+    throw new AppError("Product not found", 404);
   }
 
-  await product.deleteOne();
   res.json({ message: "Product removed" });
 });

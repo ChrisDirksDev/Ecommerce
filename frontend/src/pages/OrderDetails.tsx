@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getOrderById } from "../utils/api";
-import { Order } from "../types/types";
+import { getOrderById } from "../api/order";
+import { Order } from "../types";
 
 const OrderDetails = () => {
   const { orderId } = useParams();

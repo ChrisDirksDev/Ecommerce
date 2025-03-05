@@ -1,17 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useCartStore from "../store/cartStore";
+import { fetchCart, removeProductFromCart, updateProductQuantity } from "../services/cartService";
 
 const Cart = () => {
-  const { cart, removeFromCart, getCart } = useCartStore();
+  const [error, setError] = useState<string | null>(null);
+  const { cart } = useCartStore();
 
   useEffect(() => {
-    getCart();
-  }, [getCart]);
+    fetchCart().catch(setError);
+  }, []);
 
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold">Shopping Cart</h2>
-      {cart.items.length === 0 ? (
+      {error ? (
+        <p className="text-red-500">{error}</p>
+      ) : cart.items.length === 0 ? (
         <p className="mt-4">Your cart is empty.</p>
       ) : (
         <div className="grid gap-4 mt-4">
@@ -20,11 +24,25 @@ const Cart = () => {
               <div>
                 <h3 className="font-bold">{product.name}</h3>
                 <p>${product.price}</p>
-                <p>Quantity: {quantity}</p>
+                <button
+                  className="bg-gray-300 px-2 rounded"
+                  onClick={() => updateProductQuantity(product._id, quantity - 1)}
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <span className="px-3">{quantity}</span>
+                <button
+                  className="bg-gray-300 px-2 rounded"
+                  onClick={() => updateProductQuantity(product._id, quantity + 1)}
+                  disabled={quantity >= 10}
+                >
+                  +
+                </button>
               </div>
               <button
                 className="bg-red-500 text-white px-3 py-1 rounded"
-                onClick={() => removeFromCart(product._id)}
+                onClick={() => removeProductFromCart(product._id)}
               >
                 Remove
               </button>

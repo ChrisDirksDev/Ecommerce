@@ -1,14 +1,15 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import useOrderStore from "../store/orderStore";
+import { fetchOrders } from "../services/orderService";
 
 const Orders = () => {
 
-  const { orders, getOrders } = useOrderStore();
+  const { orders } = useOrderStore();
 
   useEffect(() => {
-    getOrders();
-  }, [getOrders]);
+    fetchOrders();
+  }, []);
 
   return (
     <div>

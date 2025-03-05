@@ -1,13 +1,10 @@
 import asyncHandler from "express-async-handler";
-import AnonUser from "../models/anonUserModel";
-import { UserRequest } from "utils/utils";
+import { extractUserFromRequest } from "utils/func";
+import { fetchAnonUser } from "services/anonUserService";
 
 export const getAnonUser = asyncHandler(async (req, res): Promise<void> => {
-  const { uuid } = (req as UserRequest).user;
-  let anonUser = await AnonUser.findOne({ uuid });
+  const user = extractUserFromRequest(req);
+  const anonUser = await fetchAnonUser(user);
 
-  if (!anonUser) {
-    anonUser = await AnonUser.create({ uuid });
-  }
   res.json(anonUser);
 });
