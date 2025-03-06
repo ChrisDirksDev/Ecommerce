@@ -9,7 +9,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     if (id) {
-      getProductById(id).then(setProduct);
+      getProductById(id).then(setProduct).catch(console.error);
     }
   }, [id]);
 

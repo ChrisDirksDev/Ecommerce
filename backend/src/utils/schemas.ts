@@ -102,6 +102,8 @@ export const updateProductBodySchema = productSchema;
 
 export const deleteProductSchema = Joi.object({ id: productIdValidation });
 
+export const getProductByIdSchema = Joi.object({ id: productIdValidation });
+
 export const updateOrderBodySchema = Joi.object({
   status: Joi.string()
     .valid("pending", "processing", "shipped", "delivered")

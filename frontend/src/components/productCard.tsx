@@ -1,14 +1,17 @@
 import { addProductToCart } from "../services/cartService";
 import { Product } from "../types";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }: { product: Product }) => {
+
+  const navigate = useNavigate();
 
   const handleAddToCart = () => {
     addProductToCart(product._id);
   };
 
   return (
-    <div className="flex flex-col border p-4 rounded">
+    <div className="flex flex-col border p-4 rounded cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
       <h3 className="font-bold">{product.name}</h3>
       <p>${product.price}</p>
       <p className="grow">{product.description}</p>

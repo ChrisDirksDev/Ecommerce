@@ -102,3 +102,14 @@ export const deleteProduct = asyncHandler(async (req: AuthRequest, res) => {
 
   res.json({ message: "Product removed" });
 });
+
+export const getProductById = asyncHandler(async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const product = await service.getProductById(id);
+
+  if (!product) {
+    throw new AppError("Product not found", 404);
+  }
+
+  res.json(product);
+});

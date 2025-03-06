@@ -4,6 +4,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductById,
 } from "../controllers/productController";
 import { adminAuth } from "../middleware/authMiddleware";
 import {
@@ -17,6 +18,7 @@ import {
   getProductsSchema,
   updateProductBodySchema,
   updateProductParamsSchema,
+  getProductByIdSchema,
 } from "utils/schemas";
 
 const router = express.Router();
@@ -36,5 +38,6 @@ router.delete(
   validateParams(deleteProductSchema),
   deleteProduct
 );
+router.get("/:id", validateParams(getProductByIdSchema), getProductById);
 
 export default router;
