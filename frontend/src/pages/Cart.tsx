@@ -1,55 +1,107 @@
-import { useEffect, useState } from "react";
-import useCartStore from "../store/cartStore";
+import { useEffect } from "react";
 import { fetchCart, removeProductFromCart, updateProductQuantity } from "../services/cartService";
+import { useRequest } from "../hooks/useRequest";
+import LoadingSpinner from "../components/loadingSpinner";
+import useCartStore from "../store/cartStore";
+import { useNavigate } from "react-router-dom";
+import useUserStore from "../store/userStore";
 
 const Cart = () => {
-  const [error, setError] = useState<string | null>(null);
-  const { cart } = useCartStore();
+  const cart = useCartStore((state) => state.cart);
+  const user = useUserStore((state) => state.user);
+  const { loading, error, execute } = useRequest<void>();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchCart().catch(setError);
-  }, []);
+    execute(fetchCart);
+  }, [execute]);
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold">Shopping Cart</h2>
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : cart.items.length === 0 ? (
-        <p className="mt-4">Your cart is empty.</p>
-      ) : (
-        <div className="grid gap-4 mt-4">
-          {cart.items.map(({ product, quantity }) => (
-            <div key={product._id} className="flex justify-between items-center border p-4 rounded">
-              <div>
-                <h3 className="font-bold">{product.name}</h3>
-                <p>${product.price}</p>
-                <button
-                  className="bg-gray-300 px-2 rounded"
-                  onClick={() => updateProductQuantity(product._id, quantity - 1)}
-                  disabled={quantity <= 1}
+    <div className="mx-auto">
+      <div className="header">
+        <h2 className="text-center">Shopping Cart</h2>
+      </div>
+      <div className="p-4 max-w-md mx-auto">
+
+        {error && <p className="text-error text-center">{error}</p>}
+        {loading ? (
+          <div className="flex justify-center mt-6">
+            <LoadingSpinner />
+          </div>
+        ) : cart.items.length === 0 ? (
+          <p className="mt-4 text-center">Your cart is empty.</p>
+        ) : (
+          <>
+            <div className="grid gap-4 mt-6">
+              {cart.items.map(({ product, quantity }) => (
+                <div
+                  key={product._id}
+                  className="flex flex-row items-center justify-between border p-4 rounded-lg shadow-sm bg-white"
                 >
-                  -
-                </button>
-                <span className="px-3">{quantity}</span>
-                <button
-                  className="bg-gray-300 px-2 rounded"
-                  onClick={() => updateProductQuantity(product._id, quantity + 1)}
-                  disabled={quantity >= 10}
-                >
-                  +
-                </button>
-              </div>
+                  {/* Product Info */}
+                  <div className="flex flex-col items-start gap-4 w-full md:w-auto">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div>
+                        <h3>{product.name}</h3>
+                        <p>${product.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    {/* Quantity Controls */}
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => updateProductQuantity(product._id, quantity - 1)}
+                        disabled={quantity <= 1 || loading}
+                        className="btn btn-primary px-3 py-1 rounded disabled:opacity-50 transition"
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <span className="text-lg">{quantity}</span>
+                      <button
+                        onClick={() => updateProductQuantity(product._id, quantity + 1)}
+                        disabled={quantity >= 10 || loading}
+                        className="btn btn-primary px-3 py-1 rounded disabled:opacity-50 transition"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to remove this item?")) {
+                        removeProductFromCart(product._id);
+                      }
+                    }}
+                    className="btn btn-danger"
+                    aria-label="Remove product from cart"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Checkout Button */}
+            <div className="mt-6 flex justify-end">
               <button
-                className="bg-red-500 text-white px-3 py-1 rounded"
-                onClick={() => removeProductFromCart(product._id)}
+                onClick={() => navigate("/checkout")}
+                disabled={loading || !user}
+                className="btn btn-primary disabled:opacity-50"
               >
-                Remove
+                {user ? "Proceed to Checkout" : "Login to Checkout"}
               </button>
             </div>
-          ))}
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

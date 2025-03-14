@@ -1,30 +1,27 @@
-import { addProductToCart } from "../services/cartService";
-import { Product } from "../types";
 import { useNavigate } from "react-router-dom";
+import { Product } from "../types";
+import { useAddToCart } from "../hooks/useAddToCart";
+import Card from "./card";
+import clsx from "clsx";
 
-const ProductCard = ({ product }: { product: Product }) => {
-
+const ProductCard = ({ product, className }: { product: Product, className?: string }) => {
+  const { added, handleAddToCart } = useAddToCart();
   const navigate = useNavigate();
 
-  const handleAddToCart = () => {
-    addProductToCart(product._id);
-  };
-
+  const footer = (
+    <button
+      className='btn btn-primary'
+      onClick={() => handleAddToCart(product, 1)}
+    >
+      {added ? "Added" : "Add to Cart"}
+    </button>
+  )
   return (
-    <div className="flex flex-col border p-4 rounded cursor-pointer" onClick={() => navigate(`/product/${product._id}`)}>
-      <h3 className="font-bold">{product.name}</h3>
-      <p>${product.price}</p>
-      <p className="grow">{product.description}</p>
+    <Card className={clsx("text-center", className)} title={product.name} footer={footer} onClick={() => navigate(`/products/${product._id}`)}>
+      <h3>${product.price}</h3>
       <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain" />
-      <h4 className="font-bold">Actions</h4>
-      <hr className="my-2" />
-      <button
-        className="bg-blue-500 text-white px-3 py-1 rounded disabled:opacity-50 cursor-pointer"
-        onClick={handleAddToCart}
-      >
-        Add to Cart
-      </button>
-    </div>
+    </Card>
+
   );
 };
 

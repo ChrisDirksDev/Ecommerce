@@ -20,9 +20,12 @@ export const fetchCart = async (): Promise<void> => {
  * Adds a product to the cart and updates the cart store.
  * @param product - The product ID.
  */
-export const addProductToCart = async (product: string): Promise<void> => {
+export const addProductToCart = async (
+  product: string,
+  quantity: number
+): Promise<void> => {
   try {
-    const cart = await api.addToCart(product);
+    const cart = await api.addToCart(product, quantity);
     setCart(cart);
   } catch (error) {
     logError("addProductToCart", error);

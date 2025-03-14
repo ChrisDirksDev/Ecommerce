@@ -7,10 +7,13 @@ export const getCart = async (): Promise<Cart> => {
   return response.data;
 };
 
-export const addToCart = async (product: string): Promise<Cart> => {
+export const addToCart = async (
+  product: string,
+  quantity: number
+): Promise<Cart> => {
   const response = await axios.post(
     `/cart/items`,
-    { product, quantity: 1 },
+    { product, quantity },
     authHeader()
   );
   return response.data;

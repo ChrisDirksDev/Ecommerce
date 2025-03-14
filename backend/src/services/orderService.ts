@@ -42,7 +42,9 @@ export const fetchOrderById = async (orderId: string, user: string) => {
   const order = await Order.findOne({
     _id: orderId,
     user,
-  });
+  })
+    .populate("items.product")
+    .lean();
 
   if (!order) {
     throw new AppError("Order not found", 404);

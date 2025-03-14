@@ -1,13 +1,14 @@
 import { create } from "zustand";
+import { User } from "../types";
 
 interface UserState {
-  user: { token: string } | null;
-  setUser: (user: { token: string } | null) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
 }
 
 const useUserStore = create<UserState>((set) => ({
   user: null,
-  setUser: (user: { token: string } | null) => set({ user }),
+  setUser: (user: User | null) => set({ user }),
 }));
 
 export default useUserStore;

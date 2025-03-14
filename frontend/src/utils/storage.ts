@@ -3,13 +3,13 @@ import useCookieStore from "../store/cookieStore";
 import useAnonUserStore from "../store/anonUserStore";
 import useUserStore from "../store/userStore";
 import useOrderStore from "../store/orderStore";
-import { Cart, Order } from "../types";
+import { Cart, Order, User } from "../types";
 import useCartStore from "../store/cartStore";
 import { useAdminStore } from "../store/adminStore";
 
 // Storage keys
 const ANON_USER_ID_KEY = "anonUserId";
-const USER_TOKEN_KEY = "token";
+const USER_TOKEN_KEY = "user";
 const ADMIN_TOKEN = "admin";
 const COOKIE_CONSENT_KEY = "cookieConsent";
 
@@ -18,15 +18,16 @@ const COOKIE_CONSENT_KEY = "cookieConsent";
  *
  * @returns {string | undefined} The user token from the cookie
  */
-export const getUserCookie = () => Cookies.get(USER_TOKEN_KEY);
+export const getUserCookie = () =>
+  JSON.parse(Cookies.get(USER_TOKEN_KEY) || "null");
 
 /**
  * Sets the user token in the cookie
  *
  * @param {string} token The user token
  */
-export const setUserCookie = (token: string) =>
-  Cookies.set(USER_TOKEN_KEY, token, { expires: 30 });
+export const setUserCookie = (user: User) =>
+  Cookies.set(USER_TOKEN_KEY, JSON.stringify(user), { expires: 30 });
 
 /**
  * Deletes the user token from the cookie
@@ -41,19 +42,11 @@ export const deleteUserCookie = () => Cookies.remove(USER_TOKEN_KEY);
 export const getUserToken = () => useUserStore.getState().user?.token;
 
 /**
- * Sets the user token in the store
- *
- * @param {string} token The user token
- */
-export const setUserToken = (token: string) =>
-  useUserStore.getState().setUser({ token });
-
-/**
  * Sets the user in the store
  *
  * @param {object} user The user object
  */
-export const setUser = (user: { token: string } | null) =>
+export const setUser = (user: User | null) =>
   useUserStore.getState().setUser(user);
 /**
  * Removes the user token from the store
@@ -74,6 +67,8 @@ export const hasUserToken = () => !!getUserToken();
  */
 export const getAnonUserCookie = () => Cookies.get(ANON_USER_ID_KEY);
 
+export const setAnonUserCookie = (anonUserId: string) =>
+  Cookies.set(ANON_USER_ID_KEY, anonUserId, { expires: 365 });
 /**
  *  Gets the anon user id from local storage
  *
@@ -185,7 +180,7 @@ export const setAdminToken = (token: string) =>
 export const deleteAdminToken = () => useAdminStore.getState().setAdmin(null);
 
 export const setAdminCookie = (token: string) =>
-  Cookies.set(ADMIN_TOKEN, token, { expires: 30 });
+  Cookies.set(ADMIN_TOKEN, token, { expires: 1 });
 
 export const getAdminToken = () => useAdminStore.getState().admin?.token;
 

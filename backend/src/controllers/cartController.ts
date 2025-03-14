@@ -79,7 +79,7 @@ export const updateCart = asyncHandler(async (req, res): Promise<void> => {
   const { quantity } = req.body;
   const user = extractUserFromRequest(req);
 
-  const cart = updateProductInCart(user, productId, quantity);
+  const cart = await updateProductInCart(user, productId, quantity);
 
   res.json(cart);
 });

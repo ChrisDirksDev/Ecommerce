@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, Mock } from 'vitest';
-import Navbar from 'components/Navbar';
+import Navbar from 'components/navbar';
 import { useUserStore } from 'store/userStore';
 
 vi.mock('store/userStore');

@@ -4,6 +4,13 @@ export interface Product {
   price: number;
   description: string;
   imageUrl: string;
+  category: "cookies" | "cakes" | "pastries";
+}
+
+export enum ProductCategory {
+  Cookies = "cookies",
+  Cakes = "cakes",
+  Pastries = "pastries",
 }
 
 export interface CartItem {
@@ -34,6 +41,9 @@ export interface User {
   role: "user" | "admin";
 }
 
+export interface AnonUser {
+  uuid: string;
+}
 export interface Cart {
   _id: string;
   user: string;

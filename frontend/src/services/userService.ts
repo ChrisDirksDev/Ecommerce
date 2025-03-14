@@ -5,7 +5,6 @@ import {
   deleteAnonUserLocalStorage,
   getUserCookie,
   deleteUserCookie,
-  setUserToken,
   setUser,
   setAnonUserId,
 } from "../utils/storage";
@@ -28,10 +27,10 @@ export const registerUser = async ({
     const response = await api.registerUser(name, email, password);
 
     if (hasConsented()) {
-      setUserCookie(response.token);
+      setUserCookie(response);
     }
 
-    setUserToken(response.token);
+    setUser(response);
 
     clearAnonUser();
   } catch (error) {
@@ -46,10 +45,10 @@ export const authUser = async (email: string, password: string) => {
     const response = await api.loginUser(email, password);
 
     if (hasConsented()) {
-      setUserCookie(response.token);
+      setUserCookie(response);
     }
 
-    setUserToken(response.token);
+    setUser(response);
 
     clearAnonUser();
   } catch (error) {
@@ -71,9 +70,9 @@ export const logoutUser = () => {
 // Initializes the user store with the user token from the cookie
 // Returns true if the user token is found in the cookie, otherwise false
 export const initUser = async () => {
-  const token = getUserCookie();
-  if (token) {
-    setUserToken(token);
+  const user = getUserCookie();
+  if (user) {
+    setUser(user);
   }
 };
 

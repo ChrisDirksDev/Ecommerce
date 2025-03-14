@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from "uuid";
 import {
   getAnonUserCookie,
   getAnonUserLocalStorage,
+  hasConsented,
+  setAnonUserCookie,
   setAnonUserId,
 } from "../utils/storage";
 import { getAnonUser } from "../api/anon";
@@ -22,7 +24,12 @@ export const initAnonUser = async () => {
     setAnonUserId(newAnonUserId);
 
     const response = await getAnonUser();
-    setAnonUserId(response);
+
+    if (hasConsented()) {
+      setAnonUserCookie(response.uuid);
+    }
+
+    setAnonUserId(response.uuid);
   } catch (error) {
     logError("initAnonUser", error);
   }
