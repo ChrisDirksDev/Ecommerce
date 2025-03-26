@@ -1,8 +1,30 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { Admin, User, Product, Order, Cart } from "models";
 
 let mongoServer: MongoMemoryServer;
+
+jest.mock("middleware/authMiddleware", () => ({
+  adminAuth: jest
+    .fn()
+    .mockImplementation(
+      (req = { user: { id: "string" } }, res: any, next: () => void) => {
+        req.user = { id: "adminId" };
+        next();
+      }
+    ),
+  userAuth: jest
+    .fn()
+    .mockImplementation(
+      (
+        req = { user: { id: "string", anonId: "string", admin: false } },
+        res: any,
+        next: () => void
+      ) => {
+        req.user = { id: "userId", anonId: "anonUserId", admin: false };
+        next();
+      }
+    ),
+}));
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();

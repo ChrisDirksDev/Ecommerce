@@ -1,204 +1,111 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import app from "../app";
-import { Cart, Order, Product } from "models";
+import { makeRequest } from "../testUtils";
+import * as OrderService from "services/orderService";
+import * as AuthMiddlware from "middleware/authMiddleware";
 
-const userId = new mongoose.Types.ObjectId();
+const order = {
+  _id: new mongoose.Types.ObjectId().toString(),
+  user: "userId",
+  products: [
+    {
+      product: "product1",
+      quantity: 2,
+    },
+  ],
+  total: 200,
+  status: "pending",
+  paymentStatus: "unpaid",
+};
 
-jest.mock("../../src/middleware/authMiddleware", () => ({
-  adminAuth: (
-    req = { user: { _id: userId.toString(), name: "string" } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: userId.toString(), name: "Test User" };
-    next();
-  },
-  userAuth: (
-    req = { user: { _id: userId.toString(), admin: true } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: userId.toString(), admin: true };
-    next();
-  },
+jest.mock("services/orderService");
+
+jest.mock("utils/func", () => ({
+  extractUserFromRequest: jest.fn(() => "userId"),
 }));
 
 describe("Order Controller", () => {
+  beforeEach(async () => {
+    jest.clearAllMocks();
+  });
+
   describe("getOrders", () => {
-    it("should return no orders if the user has none", async () => {
-      const response = await request(app)
-        .get("/api/orders")
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(200);
+    it("should attempt to get the orders", async () => {
+      (OrderService.fetchOrders as jest.Mock).mockResolvedValue([order]);
 
-      expect(response.body).toEqual([]);
-    });
+      const response = await makeRequest(request(app).get("/api/orders"), 200);
 
-    it("should return an order if the user has one", async () => {
-      await Order.create({
-        user: userId,
-        items: [
-          {
-            product: new mongoose.Types.ObjectId(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "pending",
-        status: "pending",
-      });
-
-      const response = await request(app)
-        .get("/api/orders")
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(200);
-
-      expect(response.body.length).toBe(1);
+      expect(OrderService.fetchOrders).toHaveBeenCalledWith("userId");
+      expect(response.body).toEqual([order]);
     });
   });
   describe("placeOrder", () => {
-    it("should return an error if the cart is empty", async () => {
-      const response = await request(app)
-        .post("/api/orders")
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(400);
+    it("should attempt to place an order", async () => {
+      (OrderService.placeOrder as jest.Mock).mockResolvedValue(order);
 
-      expect(response.body.message).toEqual("Cart is empty");
-    });
+      const response = await makeRequest(request(app).post("/api/orders"), 201);
 
-    it("should create a new order if the cart is not empty", async () => {
-      const productId = new mongoose.Types.ObjectId();
-
-      await Product.create({
-        _id: productId,
-        name: "Product 1",
-        price: 50,
-        description: "Description 1",
-        imageUrl: "http://example.com/image1.jpg",
-      });
-
-      await Cart.create({
-        user: userId,
-        items: [
-          {
-            product: productId,
-            quantity: 1,
-          },
-        ],
-      });
-
-      const response = await request(app)
-        .post("/api/orders")
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(201);
-
-      expect(response.body).toMatchObject({
-        user: userId.toString(),
-        items: [
-          {
-            product: productId.toString(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "pending",
-        status: "pending",
-      });
+      expect(OrderService.placeOrder).toHaveBeenCalledWith("userId");
+      expect(response.body).toEqual(order);
     });
   });
   describe("getOrderById", () => {
-    it("should return an error if the order is not found", async () => {
-      const response = await request(app)
-        .get(`/api/orders/${new mongoose.Types.ObjectId()}`)
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(404);
+    it("should attempt to get an order by ID", async () => {
+      (OrderService.fetchOrderById as jest.Mock).mockResolvedValue(order);
 
-      expect(response.body.message).toEqual("Order not found");
-    });
+      const response = await makeRequest(
+        request(app).get("/api/orders/" + order._id),
+        200
+      );
 
-    it("should return the order if it is found", async () => {
-      const order = await Order.create({
-        user: userId,
-        items: [
-          {
-            product: new mongoose.Types.ObjectId(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "pending",
-        status: "pending",
-      });
-
-      const response = await request(app)
-        .get(`/api/orders/${order._id}`)
-        .set("Authorization", `Bearer ${userId}`)
-        .expect(200);
-
-      expect(response.body).toMatchObject({
-        user: userId.toString(),
-        items: [
-          {
-            product: order.items[0].product.toString(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "pending",
-        status: "pending",
-      });
+      expect(OrderService.fetchOrderById).toHaveBeenCalledWith(
+        order._id,
+        "userId"
+      );
+      expect(response.body).toEqual(order);
     });
   });
   describe("updateOrderStatus", () => {
-    it("should return an error if the order is not found", async () => {
-      const response = await request(app)
-        .put(`/api/orders/${new mongoose.Types.ObjectId()}`)
-        .set("Authorization", `Bearer ${userId}`)
-        .send({
-          status: "shipped",
-          paymentStatus: "paid",
-        })
-        .expect(404);
+    it("should return 401 if the user is not an admin", async () => {
+      const response = await makeRequest(
+        request(app)
+          .put("/api/orders/" + order._id)
+          .send({
+            status: "shipped",
+            paymentStatus: "paid",
+          }),
+        401
+      );
 
-      expect(response.body.message).toEqual("Order not found");
+      expect(response.body.message).toBe("Unauthorized");
     });
 
-    it("should update the order status if the order is found", async () => {
-      const order = await Order.create({
-        user: userId,
-        items: [
-          {
-            product: new mongoose.Types.ObjectId(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "pending",
-        status: "pending",
-      });
+    it("should attempt to update the order status", async () => {
+      (OrderService.updateOrderStatus as jest.Mock).mockResolvedValue(order);
+      (AuthMiddlware.userAuth as jest.Mock).mockImplementation(
+        (req, res, next) => {
+          (req as any).user = { admin: true };
+          next();
+        }
+      );
 
-      const response = await request(app)
-        .put(`/api/orders/${order._id}`)
-        .set("Authorization", `Bearer ${userId}`)
-        .send({
-          status: "shipped",
-          paymentStatus: "paid",
-        })
-        .expect(200);
+      const response = await makeRequest(
+        request(app)
+          .put("/api/orders/" + order._id)
+          .send({
+            status: "shipped",
+            paymentStatus: "paid",
+          }),
+        200
+      );
 
-      expect(response.body).toMatchObject({
-        user: userId.toString(),
-        items: [
-          {
-            product: order.items[0].product.toString(),
-            quantity: 1,
-          },
-        ],
-        totalPrice: 50,
-        paymentStatus: "paid",
-        status: "shipped",
-      });
+      expect(OrderService.updateOrderStatus).toHaveBeenCalledWith(
+        order._id,
+        "shipped",
+        "paid"
+      );
+      expect(response.body).toEqual(order);
     });
   });
 });

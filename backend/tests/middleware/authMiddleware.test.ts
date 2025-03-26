@@ -1,11 +1,12 @@
 import request from "supertest";
-import express, { Request, Response, NextFunction } from "express";
+import express, { Response } from "express";
 import jwt from "jsonwebtoken";
+jest.unmock("middleware/authMiddleware");
 import {
   adminAuth,
   userAuth,
   AuthRequest,
-  UserAuthRequest,
+  UserRequest,
 } from "middleware/authMiddleware";
 import Admin from "models/adminModel";
 
@@ -17,7 +18,7 @@ app.get("/admin", adminAuth, (req: AuthRequest, res: Response) => {
   res.status(200).json({ message: "Admin route accessed" });
 });
 
-app.get("/user", userAuth, (req: UserAuthRequest, res: Response) => {
+app.get("/user", userAuth, (req: UserRequest, res: Response) => {
   res.status(200).json({ message: "User route accessed" });
 });
 
@@ -37,7 +38,6 @@ describe("Auth Middleware", () => {
       (Admin.findById as jest.Mock).mockReturnValue({
         select: jest.fn().mockResolvedValue({
           _id: "adminId",
-          name: "Admin User",
         }),
       });
 
@@ -94,7 +94,7 @@ describe("Auth Middleware", () => {
       const res = await request(app).get("/user");
 
       expect(res.status).toBe(401);
-      expect(res.text).toContain("Not authorized, no token");
+      expect(res.text).toContain("Authentication required");
     });
   });
 });

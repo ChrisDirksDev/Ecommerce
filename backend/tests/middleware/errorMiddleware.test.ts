@@ -1,3 +1,4 @@
+import { AppError } from "utils/error";
 import errorHandler from "../../src/middleware/errorMiddleware";
 import { Request, Response, NextFunction } from "express";
 
@@ -29,8 +30,7 @@ describe("errorHandler middleware", () => {
   });
 
   it("should keep the existing status code if it is not 200", () => {
-    const error = new Error("Test error");
-    res.statusCode = 404;
+    const error = new AppError("Test error", 404);
 
     errorHandler(error, req as Request, res as Response, next);
 

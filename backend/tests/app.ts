@@ -7,6 +7,7 @@ import {
   userRoutes,
   cartRoutes,
   orderRoutes,
+  anonUserRoutes,
 } from "routes";
 
 const app = express();
@@ -16,6 +17,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/anon", anonUserRoutes);
 app.use(errorHandler);
 
 export default app;

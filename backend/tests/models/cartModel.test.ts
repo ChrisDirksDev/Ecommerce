@@ -22,10 +22,10 @@ describe("Cart Model", () => {
   });
 
   it("should fail to create a cart without required fields", async () => {
-    const cartWithoutRequiredField = new Cart({});
+    const cartWithoutRequiredField = new Cart();
     let err;
     try {
-      await cartWithoutRequiredField.save();
+      const resp = await cartWithoutRequiredField.save();
     } catch (error) {
       err = error;
     }

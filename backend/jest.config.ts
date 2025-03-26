@@ -17,9 +17,6 @@ const config: Config = {
   collectCoverage: true, // Enable test coverage reports
   collectCoverageFrom: ["src/**/*.{ts,js}", "!src/**/*.d.ts"], // Ignore type definitions
   coverageDirectory: "coverage", // Store coverage reports in coverage/
-  resetMocks: true, // Reset mocks between tests
-  clearMocks: true,
-  restoreMocks: true,
 };
 
 export default config;

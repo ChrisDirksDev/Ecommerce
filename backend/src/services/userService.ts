@@ -2,14 +2,14 @@ import bcrypt from "bcryptjs";
 import { Cart, IUser, User } from "models";
 import { generateToken } from "utils/func";
 import { AppError } from "utils/error";
-import { userAuth } from "utils/types";
+import { IUserAuth } from "utils/types";
 import { getCartForUser } from "./cartService";
 
 export const registerUser = async (
   name: string,
   email: string,
   password: string,
-  userAuth: userAuth
+  userAuth: IUserAuth
 ) => {
   const userExists = await User.findOne({ email });
 
@@ -24,13 +24,13 @@ export const registerUser = async (
     password: hashedPassword,
   })) as IUser;
 
-  return handleUserAuthResponse(user, userAuth.anonId);
+  return await handleUserAuthResponse(user, userAuth.anonId);
 };
 
 export const authUser = async (
   email: string,
   password: string,
-  userAuth: userAuth
+  userAuth: IUserAuth
 ) => {
   const user = (await User.findOne({ email })) as IUser;
 
@@ -41,10 +41,11 @@ export const authUser = async (
   return await handleUserAuthResponse(user, userAuth.anonId);
 };
 
-const handleUserAuthResponse = async (user: IUser, anonId?: string) => {
-  if (user.id) {
+export const handleUserAuthResponse = async (user: IUser, anonId?: string) => {
+  if (anonId) {
     await migrateCart(user.id, anonId);
   }
+
   return {
     _id: user.id,
     name: user.name,
@@ -53,9 +54,7 @@ const handleUserAuthResponse = async (user: IUser, anonId?: string) => {
   };
 };
 
-export const migrateCart = async (userId: string, anonId?: string) => {
-  if (!anonId) return;
-
+export const migrateCart = async (userId: string, anonId: string) => {
   const anonCart = await Cart.findOne({ anonId }).lean();
   if (!anonCart || anonCart.items.length === 0) return;
 
@@ -79,4 +78,6 @@ export const migrateCart = async (userId: string, anonId?: string) => {
 
   if (updated) await userCart.save();
   await Cart.deleteOne({ anonId });
+
+  return { items: userCart.items };
 };

@@ -6,7 +6,7 @@ import {
   deleteProduct,
   getProductById,
 } from "../controllers/productController";
-import { adminAuth } from "../middleware/authMiddleware";
+import { adminAuth } from "middleware/authMiddleware";
 import {
   validateBody,
   validateParams,

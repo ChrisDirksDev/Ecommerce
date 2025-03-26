@@ -1,105 +1,63 @@
 import request from "supertest";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
 import app from "../app";
 import { registerAdmin } from "controllers/adminController";
-import { Admin } from "models";
 import errorHandler from "middleware/errorMiddleware";
+import * as AdminService from "services/adminService";
+import { makeRequest } from "../testUtils";
 
-const adminId = new mongoose.Types.ObjectId();
 dotenv.config();
-const admin = {
-  name: "Test Admin",
-  email: "test@test.com",
-  password: "password",
-};
-jest.mock("../../src/middleware/authMiddleware", () => ({
-  adminAuth: (
-    req = { user: { _id: adminId.toString(), name: "string" } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: adminId.toString(), name: "Test User" };
-    next();
-  },
-  userAuth: (
-    req = { user: { _id: adminId.toString(), name: "string" } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: adminId.toString(), name: "Test User" };
-    next();
-  },
-}));
+
+jest.mock("services/adminService");
 
 app.post("/api/admin/register", registerAdmin);
 app.use(errorHandler);
 
 describe("Admin Controller", () => {
-  afterEach(async () => {
-    await Admin.collection.dropIndexes();
+  const admin = {
+    name: "Test Admin",
+    email: "test@test.com",
+    password: "password",
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
+
   describe("registerAdmin", () => {
-    it("should create a new admin", async () => {
-      const response = await request(app)
-        .post("/api/admin/register")
-        .send(admin)
-        .expect(201);
+    it("should attempt to register an admin", async () => {
+      (AdminService.registerAdmin as jest.Mock).mockResolvedValue(admin);
 
-      expect(response.body).toEqual({
-        _id: expect.any(String),
-        name: "Test Admin",
-        email: "test@test.com",
-        token: expect.any(String),
-      });
-    });
+      const response = await makeRequest(
+        request(app).post("/api/admin/register").send(admin),
+        201
+      );
 
-    it("should return an error if the admin already exists", async () => {
-      await request(app).post("/api/admin/register").send(admin).expect(201);
-
-      const resp = await request(app)
-        .post("/api/admin/register")
-        .send(admin)
-        .expect(400);
-
-      expect(resp.body.message).toEqual("Admin already exists");
+      expect(AdminService.registerAdmin).toHaveBeenCalledWith(
+        admin.name,
+        admin.email,
+        admin.password
+      );
+      expect(response.body).toEqual(admin);
     });
   });
+
   describe("loginAdmin", () => {
-    it("should login an admin", async () => {
-      const resp = await request(app)
-        .post("/api/admin/register")
-        .send(admin)
-        .expect(201);
+    it("should attempt to login an admin", async () => {
+      (AdminService.authAdmin as jest.Mock).mockResolvedValue(admin);
 
-      const response = await request(app)
-        .post("/api/admin/login")
-        .send({
-          email: "test@test.com",
-          password: "password",
-        })
-        .expect(200);
+      const response = await makeRequest(
+        request(app)
+          .post("/api/admin/login")
+          .send({ email: admin.email, password: admin.password }),
+        200
+      );
 
-      expect(response.body).toEqual({
-        _id: expect.any(String),
-        name: "Test Admin",
-        email: "test@test.com",
-        token: expect.any(String),
-      });
-    });
-
-    it("should return an error if the credentials are invalid", async () => {
-      await request(app).post("/api/admin/register").send(admin).expect(201);
-
-      const response = await request(app)
-        .post("/api/admin/login")
-        .send({
-          email: "wrong@test.com",
-          password: "password",
-        })
-        .expect(401);
-
-      expect(response.body.message).toEqual("Invalid credentials");
+      expect(AdminService.authAdmin).toHaveBeenCalledWith(
+        admin.email,
+        admin.password
+      );
+      expect(response.body).toEqual(admin);
     });
   });
 });

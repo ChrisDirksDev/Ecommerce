@@ -1,13 +1,13 @@
 import { Request } from "express";
 
-export interface userAuth {
+export interface IUserAuth {
   id?: string;
   anonId?: string;
   admin?: boolean;
 }
 
 export interface UserRequest extends Request {
-  user: userAuth;
+  user: IUserAuth;
 }
 
 export type paymentStatus = "pending" | "paid" | "failed";

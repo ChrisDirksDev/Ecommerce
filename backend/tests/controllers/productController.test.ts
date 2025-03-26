@@ -2,163 +2,148 @@ import request from "supertest";
 import { Product } from "models";
 import mongoose from "mongoose";
 import app from "../app";
+import * as ProductService from "services/productService";
+import { makeRequest } from "../testUtils";
 
-const userId = new mongoose.Types.ObjectId();
+jest.mock("services/productService");
 
-jest.mock("../../src/middleware/authMiddleware", () => ({
-  adminAuth: (
-    req = { user: { _id: userId.toString(), name: "string" } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: userId.toString(), name: "Test User" };
-    next();
-  },
-  userAuth: (
-    req = { user: { _id: userId.toString(), name: "string" } },
-    res: any,
-    next: () => void
-  ) => {
-    req.user = { _id: userId.toString(), name: "Test User" };
-    next();
-  },
-}));
+jest.mock("models");
 
 describe("Product Controller", () => {
+  const mockProducts = [
+    {
+      name: "Product 1",
+      price: 50,
+      description: "Description 1",
+      imageUrl: "http://example.com/image.jpg",
+    },
+    {
+      name: "Product 2",
+      price: 100,
+      description: "Description 2",
+      imageUrl: "http://example.com/image2.jpg",
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe("getProducts", () => {
-    beforeEach(async () => {
-      await Product.create([
-        {
-          name: "Product 1",
-          price: 50,
-          description: "Description 1",
-          imageUrl: "http://example.com/image1.jpg",
-        },
-        {
-          name: "Product 2",
-          price: 100,
-          description: "Description 2",
-          imageUrl: "http://example.com/image2.jpg",
-        },
+    it("should attempt to get products", async () => {
+      (ProductService.fetchProducts as jest.Mock).mockResolvedValue([
+        mockProducts[1],
       ]);
-    });
 
-    it("should retrieve a paginated list of products", async () => {
-      const response = await request(app)
-        .get("/api/products?page=2&limit=1")
-        .expect(200);
+      const response = await makeRequest(
+        request(app).get("/api/products?page=2&limit=1"),
+        200
+      );
 
+      expect(ProductService.fetchProducts).toHaveBeenCalledWith(1, 1);
       expect(response.body.length).toBe(1);
       expect(response.body[0].name).toBe("Product 2");
-    });
-
-    it("should return an empty array if no products are found", async () => {
-      await Product.deleteMany({});
-
-      const response = await request(app)
-        .get("/api/products?page=1&limit=1")
-        .expect(200);
-
-      expect(response.body.length).toBe(0);
     });
   });
 
   describe("createProduct", () => {
-    it("should create a new product successfully", async () => {
-      const newProduct = {
-        name: "New Product",
-        price: 200,
-        description: "New Description",
-        imageUrl: "http://example.com/new-image.jpg",
-      };
+    const newProduct = {
+      name: "New Product",
+      price: 200,
+      description: "New Description",
+      imageUrl: "http://example.com/new-image.jpg",
+    };
 
-      const response = await request(app)
-        .post("/api/products")
-        .send(newProduct)
-        .expect(201);
+    it("should attempt to create a new product", async () => {
+      (ProductService.createProduct as jest.Mock).mockResolvedValue(newProduct);
 
-      expect(response.body.name).toBe(newProduct.name);
-      expect(response.body.price).toBe(newProduct.price);
-      expect(response.body.description).toBe(newProduct.description);
-      expect(response.body.imageUrl).toBe(newProduct.imageUrl);
+      const response = await makeRequest(
+        request(app).post("/api/products").send(newProduct),
+        201
+      );
+
+      expect(ProductService.createProduct).toHaveBeenCalledWith(
+        newProduct.name,
+        newProduct.price,
+        newProduct.description,
+        newProduct.imageUrl
+      );
+      expect(response.body).toEqual(newProduct);
     });
   });
 
   describe("updateProduct", () => {
-    let product: any;
+    const product = {
+      _id: new mongoose.Types.ObjectId().toString(),
+      name: "Product to Update",
+      price: 100,
+      description: "Description to Update",
+      imageUrl: "http://example.com/update-image.jpg",
+    };
 
-    beforeEach(async () => {
-      product = await Product.create({
-        name: "Test Product",
-        price: 100,
-        description: "Test Description",
-        imageUrl: "http://example.com/image.jpg",
-      });
+    const { _id, ...productWithoutId } = product;
+
+    it("should return a 404 if the product is not found", async () => {
+      Product.findById = jest.fn().mockResolvedValue(null);
+
+      await makeRequest(
+        request(app).put(`/api/products/${product._id}`).send(productWithoutId),
+        404
+      );
+
+      expect(ProductService.updateProduct).not.toHaveBeenCalled();
     });
 
-    it("should update a product successfully", async () => {
-      const updatedData = {
-        name: "Updated Product",
-        price: 150,
-        description: "Updated Description",
-        imageUrl: "http://example.com/updated-image.jpg",
-      };
+    it("should attempt to update the product", async () => {
+      (ProductService.updateProduct as jest.Mock).mockResolvedValue(product);
+      Product.findById = jest.fn().mockResolvedValue(product);
 
-      const response = await request(app)
-        .put(`/api/products/${product._id}`)
-        .send(updatedData)
-        .expect(200);
+      const response = await makeRequest(
+        request(app).put(`/api/products/${_id}`).send(productWithoutId),
+        200
+      );
 
-      expect(response.body.name).toBe(updatedData.name);
-      expect(response.body.price).toBe(updatedData.price);
-      expect(response.body.description).toBe(updatedData.description);
-      expect(response.body.imageUrl).toBe(updatedData.imageUrl);
-    });
-
-    it("should return 404 if the product is not found", async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-
-      const response = await request(app)
-        .put(`/api/products/${nonExistentId}`)
-        .send({
-          name: "Non-existent Product",
-          price: 200,
-          description: "Non-existent Description",
-          imageUrl: "http://example.com/non-existent-image.jpg",
-        })
-        .expect(404);
-
-      expect(response.body.message).toBe("Product not found");
+      expect(ProductService.updateProduct).toHaveBeenCalledWith(
+        product._id,
+        product.name,
+        product.price,
+        product.description,
+        product.imageUrl
+      );
+      expect(response.body).toEqual(product);
     });
   });
+
   describe("deleteProduct", () => {
-    let product: any;
+    const product = {
+      _id: new mongoose.Types.ObjectId().toString(),
+      name: "Product to Delete",
+      price: 100,
+      description: "Description to Delete",
+      imageUrl: "http://example.com/delete-image.jpg",
+    };
 
-    beforeEach(async () => {
-      product = await Product.create({
-        name: "Product to Delete",
-        price: 100,
-        description: "Description to Delete",
-        imageUrl: "http://example.com/delete-image.jpg",
-      });
-    });
+    it("should return a 404 if the product is not found", async () => {
+      (ProductService.deleteProduct as jest.Mock).mockResolvedValue(null);
 
-    it("should delete a product successfully", async () => {
-      const response = await request(app)
-        .delete(`/api/products/${product._id}`)
-        .expect(200);
-
-      expect(response.body.message).toBe("Product removed");
-    });
-
-    it("should return 404 if the product is not found", async () => {
-      const nonExistentId = new mongoose.Types.ObjectId();
-
-      const response = await request(app)
-        .delete(`/api/products/${nonExistentId}`)
-        .expect(404);
+      const response = await makeRequest(
+        request(app).delete(`/api/products/${product._id}`),
+        404
+      );
 
       expect(response.body.message).toBe("Product not found");
+    });
+
+    it("should attempt to delete the product", async () => {
+      (ProductService.deleteProduct as jest.Mock).mockResolvedValue(product);
+
+      const response = await makeRequest(
+        request(app).delete(`/api/products/${product._id}`),
+        200
+      );
+
+      expect(ProductService.deleteProduct).toHaveBeenCalledWith(product._id);
+      expect(response.body).toEqual({ message: "Product removed" });
     });
   });
 });

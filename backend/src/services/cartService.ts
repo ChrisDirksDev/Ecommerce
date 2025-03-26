@@ -58,7 +58,7 @@ interface PopulatedCartItem {
   quantity: number;
 }
 
-const getPopulatedCart = async (user: string) => {
+export const getPopulatedCart = async (user: string) => {
   const isObjectId = Types.ObjectId.isValid(user);
   const cart = await Cart.findOneAndUpdate(
     userQuery(user),

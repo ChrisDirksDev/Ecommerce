@@ -1,4 +1,6 @@
+import { func } from "joi";
 import mongoose, { InferSchemaType } from "mongoose";
+import { validate } from "uuid";
 
 const ItemSchema = new mongoose.Schema(
   {
@@ -19,17 +21,23 @@ const CartSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false,
+      required: function (this: any) {
+        return !this.anonId;
+      },
     },
     anonId: {
       type: String,
-      required: false,
+      required: function (this: any) {
+        return !this.user;
+      },
       index: true, // Helps with lookup performance
     },
     // make required
     items: { type: [ItemSchema], required: true, default: [] },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 export type ICart = InferSchemaType<typeof CartSchema>;

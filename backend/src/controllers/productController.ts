@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { AuthRequest } from "../middleware/authMiddleware";
-import Product from "../models/productModel";
+import { Product } from "../models";
 import * as service from "services/productService";
 import { AppError } from "utils/error";
 

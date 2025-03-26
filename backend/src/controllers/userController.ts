@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 
 import { UserRequest } from "../utils/types";
 import { Request, Response } from "express";
-import { authUser, registerUser } from "services/userServices";
+import { authUser, registerUser } from "services/userService";
 
 /**
  * Handles user sign-up requests.
@@ -21,7 +21,7 @@ export const signUpUser = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
     const { user } = req as UserRequest;
-    const newUser = registerUser(name, email, password, user);
+    const newUser = await registerUser(name, email, password, user);
 
     res.status(201).json(newUser);
   }

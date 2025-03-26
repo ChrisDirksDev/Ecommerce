@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Admin from "../models/adminModel";
-import { UserRequest } from "utils/func";
 
 export interface AuthRequest extends Request {
   admin?: any;
+}
+
+export interface UserRequest extends Request {
+  user?: any;
 }
 
 // Middleware to protect admin routes
@@ -27,12 +30,12 @@ export const adminAuth = async (
       req.admin = await Admin.findById(decoded.id).select("-password");
       next();
     } catch (error) {
-      res.status(401).send("Not authorized, token failed");
+      res.status(401).json("Not authorized, token failed");
     }
   }
 
   if (!token) {
-    res.status(401).send("Not authorized, no token");
+    res.status(401).json("Not authorized, no token");
   }
 };
 
@@ -58,7 +61,8 @@ export const userAuth = async (
       req.user.admin = false;
       return next();
     } catch (error) {
-      res.status(401).send("Not authorized, token failed");
+      res.status(401).json("Not authorized, token failed");
+      return;
     }
   }
 
@@ -70,5 +74,6 @@ export const userAuth = async (
     return next();
   }
 
-  res.status(401).send("Authentication required");
+  res.status(401).json("Authentication required");
+  return;
 };
