@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "ts-node -r tsconfig-paths/register src/server.ts",
     "dev": "tsx watch --inspect src/server.ts",
     "build": "tsc",
     "test": "jest --config jest.config.ts",
@@ -22,7 +22,8 @@
     "express-validator": "^7.2.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
