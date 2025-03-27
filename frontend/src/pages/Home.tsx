@@ -1,10 +1,10 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getProducts } from "../api/products";
 import { Product } from "../types";
 import ProductCard from "../components/productCard";
 import LoadingSpinner from "../components/loadingSpinner";
 import { useRequest } from "../hooks/useRequest";
-import { Link } from "react-router-dom";
 
 const Home = () => {
   const { data: products, error, loading, execute } = useRequest<Product[]>();
@@ -32,7 +32,7 @@ const Home = () => {
         {/* Mascot Image */}
         <div className="mt-8 md:mt-0 md:ml-12">
           <img
-            src="/src/assets/pngwing.com.png" // Replace with actual mascot image path
+            src="/pngwing.com.png" // Replace with actual mascot image path
             alt="Bakery Mascot"
             className="w-60 md:w-80"
           />
