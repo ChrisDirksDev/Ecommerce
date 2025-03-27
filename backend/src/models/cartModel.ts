@@ -1,6 +1,4 @@
-import { func } from "joi";
 import mongoose, { InferSchemaType } from "mongoose";
-import { validate } from "uuid";
 
 const ItemSchema = new mongoose.Schema(
   {
