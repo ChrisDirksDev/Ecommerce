@@ -1,11 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { extractUserFromRequest } from "../utils/func";
-import {
-  addProductToCart,
-  fetchCart,
-  removeProductFromCart,
-  updateProductInCart,
-} from "services/cartService";
+import * as service from "services/cartService";
 
 /**
  * Retrieves the cart for the authenticated user.
@@ -20,7 +15,7 @@ import {
  */
 export const getCart = asyncHandler(async (req, res): Promise<void> => {
   const user = extractUserFromRequest(req);
-  const cart = await fetchCart(user);
+  const cart = await service.fetchCart(user);
 
   res.json(cart);
 });
@@ -37,7 +32,7 @@ export const getCart = asyncHandler(async (req, res): Promise<void> => {
 export const addToCart = asyncHandler(async (req, res): Promise<void> => {
   const { product, quantity } = req.body;
   const user = extractUserFromRequest(req);
-  const cart = await addProductToCart(user, product, quantity);
+  const cart = await service.addProductToCart(user, product, quantity);
 
   res.json(cart);
 });
@@ -56,7 +51,7 @@ export const addToCart = asyncHandler(async (req, res): Promise<void> => {
 export const removeFromCart = asyncHandler(async (req, res): Promise<void> => {
   const { productId } = req.params;
   const user = extractUserFromRequest(req);
-  const cart = await removeProductFromCart(user, productId);
+  const cart = await service.removeProductFromCart(user, productId);
 
   res.json(cart);
 });
@@ -79,7 +74,7 @@ export const updateCart = asyncHandler(async (req, res): Promise<void> => {
   const { quantity } = req.body;
   const user = extractUserFromRequest(req);
 
-  const cart = await updateProductInCart(user, productId, quantity);
+  const cart = await service.updateProductInCart(user, productId, quantity);
 
   res.json(cart);
 });
