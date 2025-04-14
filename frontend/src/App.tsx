@@ -8,7 +8,6 @@ import Breadcrumb from "./components/breadcrumb";
 import AppRoutes from "./routes";
 
 function App() {
-
   useEffect(() => {
     initApp();
   }, []);
@@ -19,7 +18,6 @@ function App() {
       <main>
         <div className="container mx-auto px-4">
           <Breadcrumb />
-
         </div>
         <AppRoutes />
       </main>
