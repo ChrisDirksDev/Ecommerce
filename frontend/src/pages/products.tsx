@@ -51,9 +51,9 @@ const Products = () => {
             className="select cursor-pointer"
           >
             <option value="all">All Categories</option>
-            <option value="electronics">Electronics</option>
-            <option value="fashion">Fashion</option>
-            <option value="home">Home & Living</option>
+            <option value="bread">Bread</option>
+            <option value="cake">Cake</option>
+            <option value="pastry">Pastry</option>
           </select>
         </div>
 
@@ -66,7 +66,10 @@ const Products = () => {
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             {filteredProducts.map((product) => (
-              <div key={product._id} className="hover:scale-105 hover:shadow-xl transition-transform">
+              <div
+                key={product._id}
+                className="hover:scale-105 hover:shadow-xl transition-transform"
+              >
                 <ProductCard product={product} />
               </div>
             ))}
@@ -74,7 +77,6 @@ const Products = () => {
         ) : (
           <p className="text-center mt-4">No products found.</p>
         )}
-
       </div>
     </div>
   );
