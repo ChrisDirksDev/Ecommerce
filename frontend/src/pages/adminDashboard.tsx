@@ -46,7 +46,7 @@ const AdminDashboard = () => {
 
     try {
       await createProduct(newProduct);
-      execute(getProducts); // Refresh product list
+      execute(getProducts);
       setNewProduct({
         _id: "",
         name: "",
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
   const removeProduct = async (id: string) => {
     try {
       await deleteProduct(id);
-      execute(getProducts); // Refresh product list
+      execute(getProducts);
     } catch (error) {
       console.error("Error deleting product:", error);
     }

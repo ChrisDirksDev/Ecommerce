@@ -1,4 +1,3 @@
-// store/cookieStore.ts
 import { create } from "zustand";
 
 interface CookieState {

@@ -19,26 +19,27 @@ const Home = () => {
       <section className="flex flex-col md:flex-row items-center justify-center w-full h-[50vh] text-center md:text-left px-6 md:px-16 bg-[var(--color-warm-gold)]">
         {/* Text Content */}
         <div className="max-w-lg">
-          <h1 className="text-5xl text-[var(--color-dark-brown)]">Welcome to Sweet Bites!</h1>
+          <h1 className="text-5xl text-[var(--color-dark-brown)]">
+            Welcome to Sweet Bites!
+          </h1>
           <p className="mt-4 text-lg text-[var(--color-muted-gray-brown)] mb-6">
-            Delicious, handcrafted treats made with love. Try our freshly baked pastries today!
+            Delicious, handcrafted treats made with love. Try our freshly baked
+            pastries today!
           </p>
           <Link to="/products" className="btn btn-primary">
             Shop Now
           </Link>
-
         </div>
 
         {/* Mascot Image */}
         <div className="mt-8 md:mt-0 md:ml-12">
           <img
-            src="/pngwing.com.png" // Replace with actual mascot image path
+            src="/pngwing.com.png"
             alt="Bakery Mascot"
             className="w-60 md:w-80"
           />
         </div>
       </section>
-
 
       {/* Products Section */}
       <section className="container text-center mt-12 py-12">
@@ -61,7 +62,11 @@ const Home = () => {
           ) : products && products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
-                <ProductCard key={product._id} product={product} className="hover:scale-105 hover:shadow-xl transition-transform" />
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  className="hover:scale-105 hover:shadow-xl transition-transform"
+                />
               ))}
             </div>
           ) : (
@@ -69,8 +74,6 @@ const Home = () => {
           )}
         </div>
       </section>
-
-
 
       {/* Customer Reviews Section */}
       <section className="container text-center mt-24 mb-32">
@@ -86,7 +89,9 @@ const Home = () => {
               The best bakery in town! Their croissants are amazing!
               <span className="text-4xl font-bold">”</span>
             </p>
-            <span className="block mt-4 text-[var(--color-muted-gray-brown)] font-medium">- Sarah J.</span>
+            <span className="block mt-4 text-[var(--color-muted-gray-brown)] font-medium">
+              - Sarah J.
+            </span>
           </div>
 
           {/* Review Card 2 */}
@@ -96,7 +101,9 @@ const Home = () => {
               Fresh, delicious, and always on time. Highly recommend!
               <span className="text-4xl font-bold">”</span>
             </p>
-            <span className="block mt-4 text-[var(--color-muted-gray-brown)] font-medium">- John D.</span>
+            <span className="block mt-4 text-[var(--color-muted-gray-brown)] font-medium">
+              - John D.
+            </span>
           </div>
         </div>
       </section>

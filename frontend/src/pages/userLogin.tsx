@@ -8,20 +8,18 @@ const UserLogin = () => {
   const user = useUserStore((state) => state.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Track login errors
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-
 
   useEffect(() => {
     if (user) {
       navigate("/dashboard");
     }
-  }
-    , [user, navigate]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError("");
     try {
       await authUser(email, password);
       navigate("/");
@@ -30,15 +28,17 @@ const UserLogin = () => {
     }
   };
 
-
   const footer = (
     <p className="text-center mt-4">
       Need an account?{" "}
-      <Link to="/signup" className="text-[var(--color-dark-brown)] hover:underline">
+      <Link
+        to="/signup"
+        className="text-[var(--color-dark-brown)] hover:underline"
+      >
         Sign up
       </Link>
     </p>
-  )
+  );
 
   return (
     <div className="flex flex-col items-center justify-center bg-[var(--color-light-beige)] px-6">
