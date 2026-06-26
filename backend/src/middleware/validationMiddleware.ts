@@ -1,5 +1,5 @@
 import Joi from "joi";
-import e, { Response, Request } from "express";
+import { Response, Request } from "express";
 
 export const validateBody =
   (Schema: Joi.ObjectSchema) => (req: Request, res: Response, next: any) => {
