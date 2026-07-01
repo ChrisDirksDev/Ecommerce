@@ -134,7 +134,7 @@
   }
 
   .section-shell {
-    @apply container py-16 md:py-24;
+    @apply container py-16 md:py-24 m-auto;
   }
 
   .surface-panel {

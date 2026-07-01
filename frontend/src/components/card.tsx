@@ -24,7 +24,7 @@ const Card = ({ title, children, footer, onClick, className }: CardProps) => {
   return (
     <div className={clsx(`surface-panel p-6 w-full transition duration-200 ${onClick ? 'cursor-pointer hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(47,36,28,0.12)]' : ''}`, className)} onClick={handleClick}>
       {title && <h3 className="mb-4">{title}</h3>}
-      <div>{children}</div>
+      <div className="flex-1">{children}</div>
       {footer && <div className="mt-5 border-t border-[var(--color-border)] pt-5">{footer}</div>}
     </div>
   );

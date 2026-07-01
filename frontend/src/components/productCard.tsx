@@ -21,7 +21,7 @@ const ProductCard = ({ product, className }: { product: Product; className?: str
     </button>
   )
   return (
-    <Card className={clsx("group h-full max-w-sm p-4", className)} footer={footer} onClick={() => navigate(`/products/${product._id}`)}>
+    <Card className={clsx("group flex h-full max-w-sm flex-col p-4", className)} footer={footer} onClick={() => navigate(`/products/${product._id}`)}>
       <div className="aspect-[4/3] overflow-hidden rounded-lg bg-[var(--color-cream)]">
         <img
           src={product.imageUrl}
