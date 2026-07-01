@@ -68,6 +68,12 @@ describe("Order Controller", () => {
   });
   describe("updateOrderStatus", () => {
     it("should return 401 if the user is not an admin", async () => {
+      (AuthMiddlware.adminAuth as jest.Mock).mockImplementationOnce(
+        (req, res, next) => {
+          next();
+        }
+      );
+
       const response = await makeRequest(
         request(app)
           .put("/api/orders/" + order._id)
@@ -83,9 +89,9 @@ describe("Order Controller", () => {
 
     it("should attempt to update the order status", async () => {
       (OrderService.updateOrderStatus as jest.Mock).mockResolvedValue(order);
-      (AuthMiddlware.userAuth as jest.Mock).mockImplementation(
+      (AuthMiddlware.adminAuth as jest.Mock).mockImplementation(
         (req, res, next) => {
-          (req as any).user = { admin: true };
+          (req as any).admin = { id: "adminId" };
           next();
         }
       );

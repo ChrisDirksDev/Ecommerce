@@ -1,5 +1,5 @@
 import express from "express";
-import { userAuth } from "middleware/authMiddleware";
+import { adminAuth, userAuth } from "middleware/authMiddleware";
 import {
   getOrders,
   placeOrder,
@@ -21,7 +21,7 @@ router.get(
 );
 router.put(
   "/:orderId",
-  userAuth,
+  adminAuth,
   validateParams(orderIdParamsSchema),
   validateBody(updateOrderBodySchema),
   updateOrderStatus

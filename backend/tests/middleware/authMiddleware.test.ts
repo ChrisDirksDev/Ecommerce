@@ -58,6 +58,19 @@ describe("Auth Middleware", () => {
       expect(res.text).toContain("Not authorized, token failed");
     });
 
+    it("should deny access when the token does not belong to an admin", async () => {
+      (Admin.findById as jest.Mock).mockReturnValue({
+        select: jest.fn().mockResolvedValue(null),
+      });
+
+      const res = await request(app)
+        .get("/admin")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(401);
+      expect(res.text).toContain("Not authorized, admin not found");
+    });
+
     it("should deny access to admin route with no token", async () => {
       const res = await request(app).get("/admin");
 

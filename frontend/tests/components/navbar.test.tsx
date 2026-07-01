@@ -1,62 +1,90 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi, Mock } from 'vitest';
-import Navbar from 'components/navbar';
-import { useUserStore } from 'store/userStore';
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import Navbar from "components/navbar";
+import useCartStore from "store/cartStore";
+import useUserStore from "store/userStore";
+import { logoutUser } from "services/userService";
 
-vi.mock('store/userStore');
+vi.mock("services/userService", () => ({
+  logoutUser: vi.fn(),
+}));
 
-const mockedUseUserStore = useUserStore as unknown as Mock;
+vi.mock("components/cartIcon", () => ({
+  default: () => <a href="/cart">Cart (0)</a>,
+}));
 
-describe('Navbar', () => {
-  it('renders correctly for logged-out users', () => {
-    mockedUseUserStore.mockReturnValue({ user: null, logout: vi.fn() });
+const renderNavbar = () =>
+  render(
+    <MemoryRouter>
+      <Navbar />
+    </MemoryRouter>
+  );
 
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText(/home/i)).toBeInTheDocument();
-    expect(screen.getByText(/cart/i)).toBeInTheDocument();
-    expect(screen.getByText(/checkout/i)).toBeInTheDocument();
-    expect(screen.getByText(/orders/i)).toBeInTheDocument();
-    expect(screen.getByText(/admin/i)).toBeInTheDocument();
-    expect(screen.getByText(/login/i)).toBeInTheDocument();
+describe("Navbar", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    cleanup();
+    useUserStore.setState({ user: null });
+    useCartStore.setState({ cart: { _id: "", user: "", items: [], total: 0 } });
   });
 
-  it('renders correctly for logged-in users', () => {
-    mockedUseUserStore.mockReturnValue({ user: { name: 'Test User' }, logout: vi.fn() });
+  it("renders the logged-out navigation", () => {
+    renderNavbar();
 
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+    expect(screen.getByRole("link", { name: /ecommerce/i })).toHaveAttribute(
+      "href",
+      "/"
     );
-
-    expect(screen.getByText(/home/i)).toBeInTheDocument();
-    expect(screen.getByText(/cart/i)).toBeInTheDocument();
-    expect(screen.getByText(/checkout/i)).toBeInTheDocument();
-    expect(screen.getByText(/orders/i)).toBeInTheDocument();
-    expect(screen.getByText(/admin/i)).toBeInTheDocument();
-    expect(screen.getByText(/logout/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /login/i })).toHaveAttribute(
+      "href",
+      "/login"
+    );
+    expect(screen.getByRole("link", { name: /cart/i })).toHaveAttribute(
+      "href",
+      "/cart"
+    );
   });
 
-  it('shows logout confirmation dialog when logout button is clicked', () => {
-    const mockLogout = vi.fn();
-    mockedUseUserStore.mockReturnValue({ user: { name: 'Test User' }, logout: mockLogout });
+  it("renders the logged-in navigation", () => {
+    useUserStore.setState({
+      user: {
+        _id: "user-1",
+        name: "Test User",
+        email: "test@example.com",
+        token: "token",
+        role: "user",
+      },
+    });
 
-    render(
-      <MemoryRouter>
-        <Navbar />
-      </MemoryRouter>
+    renderNavbar();
+
+    expect(screen.getByRole("link", { name: /dashboard/i })).toHaveAttribute(
+      "href",
+      "/dashboard"
     );
+    expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByText(/logout/i));
-    expect(screen.getByText(/are you sure you want to log out/i)).toBeInTheDocument();
+  it("confirms logout before signing out", () => {
+    useUserStore.setState({
+      user: {
+        _id: "user-1",
+        name: "Test User",
+        email: "test@example.com",
+        token: "token",
+        role: "user",
+      },
+    });
 
-    fireEvent.click(screen.getByText(/yes/i));
-    expect(mockLogout).toHaveBeenCalled();
+    renderNavbar();
+
+    fireEvent.click(screen.getByRole("button", { name: /logout/i }));
+    expect(
+      screen.getByText(/are you sure you want to log out/i)
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /yes/i }));
+    expect(logoutUser).toHaveBeenCalledTimes(1);
   });
 });

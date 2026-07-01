@@ -1,214 +1,157 @@
-import axios from "axios";
-import { describe, it, expect, afterEach, vi } from "vitest";
-import {
-  fetchProducts,
-  fetchProductById,
-  fetchOrders,
-  placeOrder,
-  getOrderById,
-  registerUser,
-  loginUser,
-  getCart,
-  addToCart,
-  removeFromCart,
-  clearCart,
-  loginAdmin,
-} from "api/api";
-import { Product, Order, User, Cart } from "types";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import axios from "api/axiosConfig";
+import { getProducts, getProductById } from "api/products";
+import { getOrders, getOrderById, placeOrder } from "api/order";
+import { loginUser, registerUser } from "api/user";
+import { getCart, addToCart, removeFromCart, clearCart } from "api/cart";
+import { loginAdmin } from "api/admin";
+import { Cart, Order, Product, User } from "types";
 
-vi.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock("api/axiosConfig", () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
 
-describe("API functions", () => {
+vi.mock("utils", () => ({
+  authHeader: vi.fn(() => ({ headers: { Authorization: "Bearer token" } })),
+}));
+
+const mockedAxios = vi.mocked(axios);
+
+const product: Product = {
+  _id: "product-1",
+  name: "Product 1",
+  price: 100,
+  imageUrl: "http://example.com/image.jpg",
+  description: "Description",
+  category: "cookies",
+};
+
+const order: Order = {
+  _id: "order-1",
+  totalPrice: 200,
+  items: [],
+  user: "user-1",
+  status: "pending",
+  createdAt: "",
+  updatedAt: "",
+};
+
+const cart: Cart = { _id: "cart-1", user: "user-1", items: [], total: 0 };
+
+const user: User = {
+  _id: "user-1",
+  name: "User",
+  email: "user@test.com",
+  token: "token",
+  role: "user",
+};
+
+describe("API modules", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("fetchProducts should fetch products", async () => {
-    const products: Product[] = [
-      {
-        _id: "1",
-        name: "Product 1",
-        price: 100,
-        imageUrl: "http://example.com/image1.jpg",
-        description: "Description 1",
-      },
-    ];
-    mockedAxios.get.mockResolvedValue({ data: products });
+  it("fetches products", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: [product] });
 
-    const result = await fetchProducts();
+    await expect(getProducts()).resolves.toEqual([product]);
     expect(mockedAxios.get).toHaveBeenCalledWith("/products");
-    expect(result).toEqual(products);
   });
 
-  it("fetchProductById should fetch a product by ID", async () => {
-    const product: Product = {
-      _id: "1",
-      name: "Product 1",
-      price: 100,
-      imageUrl: "http://example.com/image1.jpg",
-      description: "Description 1",
-    };
-    mockedAxios.get.mockResolvedValue({ data: product });
+  it("fetches a product by id", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: product });
 
-    const result = await fetchProductById("1");
-    expect(mockedAxios.get).toHaveBeenCalledWith("/products/1");
-    expect(result).toEqual(product);
+    await expect(getProductById(product._id)).resolves.toEqual(product);
+    expect(mockedAxios.get).toHaveBeenCalledWith(`/products/${product._id}`);
   });
 
-  it("fetchOrders should fetch orders", async () => {
-    const orders: Order[] = [
-      {
-        _id: "1",
-        totalPrice: 200,
-        items: [],
-        user: "",
-        status: "pending",
-        createdAt: "",
-        updatedAt: "",
-      },
-    ];
-    mockedAxios.get.mockResolvedValue({ data: orders });
+  it("places and fetches orders with auth headers", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: [order] });
+    mockedAxios.post.mockResolvedValueOnce({ data: order });
+    mockedAxios.get.mockResolvedValueOnce({ data: order });
 
-    const result = await fetchOrders("token");
-    expect(mockedAxios.get).toHaveBeenCalledWith("/orders", {
+    await expect(getOrders()).resolves.toEqual([order]);
+    await expect(placeOrder()).resolves.toEqual(order);
+    await expect(getOrderById(order._id)).resolves.toEqual(order);
+
+    expect(mockedAxios.get).toHaveBeenNthCalledWith(1, "/orders", {
       headers: { Authorization: "Bearer token" },
     });
-    expect(result).toEqual(orders);
-  });
-
-  it("placeOrder should place an order", async () => {
-    const order: Order = {
-      _id: "1",
-      totalPrice: 200,
-      items: [],
-      user: "",
-      status: "pending",
-      createdAt: "",
-      updatedAt: "",
-    };
-    mockedAxios.post.mockResolvedValue({ data: order });
-
-    const result = await placeOrder("token");
     expect(mockedAxios.post).toHaveBeenCalledWith("/orders", null, {
       headers: { Authorization: "Bearer token" },
     });
-    expect(result).toEqual(order);
-  });
-
-  it("getOrderById should fetch an order by ID", async () => {
-    const order: Order = {
-      _id: "1",
-      totalPrice: 200,
-      items: [],
-      user: "",
-      status: "pending",
-      createdAt: "",
-      updatedAt: "",
-    };
-    mockedAxios.get.mockResolvedValue({ data: order });
-
-    const result = await getOrderById("1");
-    expect(mockedAxios.get).toHaveBeenCalledWith("/orders/1");
-    expect(result).toEqual(order);
-  });
-
-  it("registerUser should register a user", async () => {
-    mockedAxios.post.mockResolvedValue({});
-
-    await registerUser({
-      name: "User",
-      email: "user@test.com",
-      password: "password",
-    });
-    expect(mockedAxios.post).toHaveBeenCalledWith("/user/signup", {
-      name: "User",
-      email: "user@test.com",
-      password: "password",
+    expect(mockedAxios.get).toHaveBeenNthCalledWith(2, `/orders/${order._id}`, {
+      headers: { Authorization: "Bearer token" },
     });
   });
 
-  it("loginUser should login a user", async () => {
-    const user: User = {
-      _id: "1",
-      name: "User",
-      email: "user@test.com",
-      token: "token",
-      role: "user",
-    };
-    mockedAxios.post.mockResolvedValue({ data: user });
+  it("registers and logs in users", async () => {
+    mockedAxios.post.mockResolvedValueOnce({ data: user });
+    mockedAxios.post.mockResolvedValueOnce({ data: user });
 
-    const result = await loginUser("user@test.com", "password");
-    expect(mockedAxios.post).toHaveBeenCalledWith("/user/login", {
-      email: "user@test.com",
-      password: "password",
-    });
-    expect(result).toEqual(user);
+    await expect(
+      registerUser(user.name, user.email, "password")
+    ).resolves.toEqual(user);
+    await expect(loginUser(user.email, "password")).resolves.toEqual(user);
+
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      "/user/signup",
+      { name: user.name, email: user.email, password: "password" },
+      { headers: { Authorization: "Bearer token" } }
+    );
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      2,
+      "/user/login",
+      { email: user.email, password: "password" },
+      { headers: { Authorization: "Bearer token" } }
+    );
   });
 
-  it("getCart should fetch the cart", async () => {
-    const cart: Cart = { _id: "1", user: "1", items: [], total: 0 };
-    mockedAxios.get.mockResolvedValue({ data: cart });
+  it("reads and mutates the cart with auth headers", async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: cart });
+    mockedAxios.post.mockResolvedValueOnce({ data: cart });
+    mockedAxios.delete.mockResolvedValueOnce({ data: cart });
+    mockedAxios.put.mockResolvedValueOnce({ data: cart });
 
-    const result = await getCart("token");
+    await expect(getCart()).resolves.toEqual(cart);
+    await expect(addToCart(product._id, 2)).resolves.toEqual(cart);
+    await expect(removeFromCart(product._id)).resolves.toEqual(cart);
+    await expect(clearCart()).resolves.toEqual(cart);
+
     expect(mockedAxios.get).toHaveBeenCalledWith("/cart", {
       headers: { Authorization: "Bearer token" },
     });
-    expect(result).toEqual(cart);
-  });
-
-  it("addToCart should add a product to the cart", async () => {
-    const cart: Cart = { _id: "1", user: "1", items: [], total: 0 };
-    mockedAxios.post.mockResolvedValue({ data: cart });
-
-    const result = await addToCart("1", "token");
     expect(mockedAxios.post).toHaveBeenCalledWith(
       "/cart/items",
-      { product: "1", quantity: 1 },
+      { product: product._id, quantity: 2 },
       { headers: { Authorization: "Bearer token" } }
     );
-    expect(result).toEqual(cart);
-  });
-
-  it("removeFromCart should remove a product from the cart", async () => {
-    const cart: Cart = { _id: "1", user: "1", items: [], total: 0 };
-    mockedAxios.delete.mockResolvedValue({ data: cart });
-
-    const result = await removeFromCart("1", "token");
-    expect(mockedAxios.delete).toHaveBeenCalledWith("/cart/items/1", {
-      headers: { Authorization: "Bearer token" },
-    });
-    expect(result).toEqual(cart);
-  });
-
-  it("clearCart should clear the cart", async () => {
-    const cart: Cart = { _id: "1", user: "1", items: [], total: 0 };
-    mockedAxios.put.mockResolvedValue({ data: cart });
-
-    const result = await clearCart("token");
+    expect(mockedAxios.delete).toHaveBeenCalledWith(
+      `/cart/items/${product._id}`,
+      { headers: { Authorization: "Bearer token" } }
+    );
     expect(mockedAxios.put).toHaveBeenCalledWith(
       "/cart/items",
       { items: [] },
       { headers: { Authorization: "Bearer token" } }
     );
-    expect(result).toEqual(cart);
   });
 
-  it("loginAdmin should login an admin", async () => {
-    const user: User = {
-      _id: "1",
-      name: "Admin",
-      email: "admin@test.com",
-      token: "token",
-      role: "admin",
-    };
-    mockedAxios.post.mockResolvedValue({ data: user });
+  it("logs in admins", async () => {
+    mockedAxios.post.mockResolvedValueOnce({ data: user });
 
-    const result = await loginAdmin("admin@test.com", "password");
+    await expect(loginAdmin("admin@test.com", "password")).resolves.toEqual(
+      user
+    );
     expect(mockedAxios.post).toHaveBeenCalledWith("/admin/login", {
       email: "admin@test.com",
       password: "password",
     });
-    expect(result).toEqual(user);
   });
 });

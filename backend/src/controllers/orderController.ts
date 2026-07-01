@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { UserRequest } from "../utils/types";
+import { AuthRequest } from "middleware/authMiddleware";
 import { extractUserFromRequest } from "utils/func";
 import * as service from "services/orderService";
 import { AppError } from "utils/error";
@@ -31,7 +31,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 // 🔹 Update Order Status (Admin Only)
 export const updateOrderStatus = asyncHandler(async (req, res) => {
-  const { admin } = (req as UserRequest).user;
+  const { admin } = req as AuthRequest;
   if (!admin) {
     throw new AppError("Unauthorized", 401);
   }

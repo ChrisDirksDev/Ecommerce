@@ -3,12 +3,14 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 
 let mongoServer: MongoMemoryServer;
 
+jest.setTimeout(30000);
+
 jest.mock("middleware/authMiddleware", () => ({
   adminAuth: jest
     .fn()
     .mockImplementation(
-      (req = { user: { id: "string" } }, res: any, next: () => void) => {
-        req.user = { id: "adminId" };
+      (req = { admin: { id: "string" } }, res: any, next: () => void) => {
+        req.admin = { id: "adminId" };
         next();
       }
     ),

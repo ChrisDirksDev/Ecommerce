@@ -4,7 +4,10 @@
   "scripts": {
     "client": "cd frontend && npm run dev",
     "server": "cd backend && npm run dev",
-    "fulldev": "concurrently \"npm run server\" \"npm run client\""
+    "fulldev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "test": "npm --prefix backend test -- --runInBand && npm --prefix frontend test",
+    "lint": "npm --prefix frontend run lint"
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",

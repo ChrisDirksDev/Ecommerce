@@ -2,6 +2,25 @@ import { useState } from "react";
 import { authUser, registerUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 
+const getErrorMessage = (error: unknown) => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof error.response === "object" &&
+    error.response !== null &&
+    "data" in error.response &&
+    typeof error.response.data === "object" &&
+    error.response.data !== null &&
+    "message" in error.response.data &&
+    typeof error.response.data.message === "string"
+  ) {
+    return error.response.data.message;
+  }
+
+  return "Signup failed";
+};
+
 const Signup = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -23,8 +42,8 @@ const Signup = () => {
       await registerUser(formData);
       await authUser(formData.email, formData.password);
       navigate("/");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Signup failed");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   };
 
