@@ -92,6 +92,23 @@ Default local URLs:
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:5000`
 
+## Seed Example Data
+
+After configuring `MONGO_URI` in `backend/.env`, seed the database from the
+repository root:
+
+```bash
+npm run seed
+```
+
+The command can be run more than once without duplicating its demo records. It
+adds six products, a customer with a cart and order, and an admin account.
+
+```text
+Admin: admin@example.com / Password123!
+Customer: customer@example.com / Password123!
+```
+
 ## Quality Checks
 
 Run all builds:
@@ -151,4 +168,3 @@ npm --prefix frontend run lint
 - Real `.env` files are intentionally ignored. Use the `.env.example` files for setup.
 - The backend test suite uses MongoDB Memory Server, so backend tests do not require a local test database.
 - The backend currently has one remaining moderate `npm audit` advisory chain from Jest/ts-jest coverage tooling. The production dependency audit was reduced without accepting npm's forced downgrade to older vulnerable Jest packages.
-
