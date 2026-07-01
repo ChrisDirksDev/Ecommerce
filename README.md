@@ -69,7 +69,8 @@ NODE_ENV=development
 Frontend:
 
 ```text
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_DEV_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=https://your-production-backend.example.com/api
 ```
 
 ## Running The App
