@@ -20,18 +20,18 @@ const Breadcrumb = () => {
   };
 
   return (
-    <div className="mb-4">
-      <nav className="text-sm font-semibold">
-        <Link to="/" className="hover:underline">Home</Link>
-        {pathSegments.length > 0 && ' > '}
+    <div className="py-4">
+      <nav className="text-sm font-semibold text-[var(--color-muted-gray-brown)]" aria-label="Breadcrumb">
+        <Link to="/" className="transition hover:text-[var(--color-warm-gold)]">Home</Link>
+        {pathSegments.length > 0 && <span className="mx-2 text-[var(--color-border)]">/</span>}
         {pathSegments.map((segment, index) => {
           const fullPath = generateLink(segment, index);
           return (
             <span key={index}>
-              <Link to={fullPath} className="hover:underline">
+              <Link to={fullPath} className="transition hover:text-[var(--color-warm-gold)]">
                 {segment.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
               </Link>
-              {index < pathSegments.length - 1 && ' > '}
+              {index < pathSegments.length - 1 && <span className="mx-2 text-[var(--color-border)]">/</span>}
             </span>
           );
         })}

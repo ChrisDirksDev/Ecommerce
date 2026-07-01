@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { authUser, registerUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
+import Card from "../components/card";
 
 const getErrorMessage = (error: unknown) => {
   if (
@@ -48,10 +49,10 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex justify-center items-center bg-[var(--color-light-beige)] p-4">
-      <div className="bg-white p-6 rounded-2xl shadow-md max-w-md w-full">
-        <h2 className="text-center mb-4">Sign Up</h2>
-        {error && <p className="text-danger text-sm text-center mb-3">{error}</p>}
+    <div className="section-shell flex justify-center pt-8">
+      <Card className="max-w-md" title="Create an account">
+        <p className="mb-6">Save your details and make the next bakery order faster.</p>
+        {error && <p className="text-error text-sm text-center mb-3">{error}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             type="text"
@@ -79,12 +80,12 @@ const Signup = () => {
           />
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn btn-primary w-full"
           >
-            Sign Up
+            Create account
           </button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };

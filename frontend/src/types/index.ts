@@ -4,13 +4,15 @@ export interface Product {
   price: number;
   description: string;
   imageUrl: string;
-  category: "cookies" | "cakes" | "pastries";
+  category?: ProductCategory | string;
+  catagory?: ProductCategory | string;
 }
 
 export enum ProductCategory {
-  Cookies = "cookies",
-  Cakes = "cakes",
-  Pastries = "pastries",
+  Bread = "Bread",
+  Cakes = "Cakes",
+  Cupcakes = "Cupcakes",
+  Pastries = "Pastries",
 }
 
 export interface CartItem {

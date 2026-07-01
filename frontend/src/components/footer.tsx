@@ -1,53 +1,47 @@
 import Tooltip from "./tooltip";
+import { EnvelopeIcon } from "@heroicons/react/24/outline";
 
 const Footer = () => {
   return (
-    <footer className="bg-[var(--color-dark-brown)] text-white pt-10 pb-6 mt-12">
-      <div className="container grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-
-        {/* Branding & About */}
+    <footer className="mt-16 border-t border-[var(--color-border)] bg-[var(--color-ink)] pt-12 pb-8 text-white">
+      <div className="container grid grid-cols-1 gap-10 text-center md:grid-cols-[1.2fr_0.8fr_1fr] md:text-left">
         <div>
-          <h2 className="tracking-wide text-[var(--color-warm-gold)]">Ecommerce</h2>
-          <p className="text-sm mt-3 text-white">
-            Discover the best deals and latest trends in one place.
+          <h2 className="text-2xl text-white">Sweet Bites</h2>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-white/70">
+            Small-batch bakery favorites with a polished online shopping experience built for easy discovery and checkout.
           </p>
         </div>
 
-        {/* Social Links */}
         <div>
-          <h3 className="text-[var(--color-warm-gold)]">Follow Us</h3>
-          <div className="flex justify-center md:justify-start space-x-5 mt-3">
-            <a href="#" className="link">Facebook</a>
-            <a href="#" className="link">Twitter</a>
-            <a href="#" className="link">Instagram</a>
+          <h3 className="text-base text-white">Explore</h3>
+          <div className="mt-4 flex justify-center gap-5 md:justify-start">
+            <a href="/products" className="text-sm font-semibold text-white/70 transition hover:text-[var(--color-warm-gold)]">Shop</a>
+            <a href="/cart" className="text-sm font-semibold text-white/70 transition hover:text-[var(--color-warm-gold)]">Cart</a>
+            <a href="/privacy-policy" className="text-sm font-semibold text-white/70 transition hover:text-[var(--color-warm-gold)]">Privacy</a>
           </div>
         </div>
 
-        {/* Newsletter Signup */}
         <div>
-          <h3 className="text-[var(--color-warm-gold)]">Stay Updated</h3>
-          <form className="mt-3 flex items-center border border-[var(--color-warm-gold)] rounded-lg  overflow-hidden">
+          <h3 className="text-base text-white">Fresh From The Oven</h3>
+          <form className="mt-4 flex overflow-hidden rounded-lg border border-white/15 bg-white/5">
             <input
               type="email"
               placeholder="Enter your email"
-              className="px-4 py-2 flex-grow text-white focus:outline-none rounded-r-none"
+              className="min-w-0 flex-grow border-0 bg-transparent px-4 py-3 text-white placeholder:text-white/50 focus:ring-0"
+              aria-label="Email address"
             />
             <Tooltip text="This is a dummy feature">
-              <button className="bg-[var(--color-warm-gold)] text-[var(--color-dark-brown)] px-4 py-2 hover:bg-[var(--color-dark-brown)] hover:text-[var(--color-warm-gold)] transition cursor-pointer">
-                Subscribe
+              <button className="btn rounded-none bg-[var(--color-warm-gold)] px-4 py-3 text-white hover:bg-white hover:text-[var(--color-ink)]">
+                <EnvelopeIcon className="h-5 w-5" />
+                <span className="sr-only sm:not-sr-only">Join</span>
               </button>
             </Tooltip>
           </form>
         </div>
       </div>
 
-      {/* Bottom Section */}
-      <div className="flex justify-center border-t border-[var(--color-muted-gray-brown)] mt-8 pt-4 text-center text-sm text-white font-semibold">
-        <p>© {new Date().getFullYear()} Ecommerce. All rights reserved.</p>
-        <span className="mx-2 text-[var(--color-muted-gray-brown)]"> | </span>
-        <p>
-          <a href="/privacy-policy" className="hover:underline">Privacy Policy</a>
-        </p>
+      <div className="container mt-10 border-t border-white/10 pt-6 text-center text-sm text-white/60">
+        <p>© {new Date().getFullYear()} Sweet Bites. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShoppingCartIcon } from "@heroicons/react/16/solid";
+import { ShoppingBagIcon } from "@heroicons/react/24/outline";
 import useCartStore from "../store/cartStore";
 import { Link } from "react-router-dom";
 
@@ -18,12 +18,13 @@ export default function CartIcon() {
   };
 
   return (
-    <div className="relative w-6">
-      <Link to="/cart">
-        <div className={`${bounce ? "animate-bounce" : ""} hover:scale-110 transform transition-transform`}>
-          <ShoppingCartIcon className="w-6 h-6" />
-        </div>
-        <span className="absolute -top-2 -right-4 bg-[var(--color-soft-pink-dark)] text-white text-xs px-2 py-1 rounded-full">
+    <div className="relative inline-flex">
+      <Link to="/cart" className="btn btn-primary px-4 py-2" aria-label={`Cart with ${cart.items.length} items`}>
+        <span className={`${bounce ? "animate-bounce" : ""} transform transition-transform`}>
+          <ShoppingBagIcon className="h-5 w-5" />
+        </span>
+        <span className="hidden sm:inline">Cart</span>
+        <span className="absolute -right-2 -top-2 min-w-6 rounded-full bg-[var(--color-warm-gold)] px-2 py-1 text-center text-xs font-bold text-white">
           {cart.items.length}
         </span>
       </Link>

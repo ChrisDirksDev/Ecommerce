@@ -8,20 +8,20 @@ const CookieBanner = () => {
   if (hasConsented) return null; // Hide if already accepted/declined
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[var(--color-dark-brown)] text-white p-6 flex justify-between items-center shadow-lg rounded-t-lg">
-      <p className="text-sm md:text-base">
+    <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto flex max-w-5xl flex-col gap-4 rounded-lg border border-white/10 bg-[var(--color-ink)] p-5 text-white shadow-2xl md:flex-row md:items-center md:justify-between">
+      <p className="text-sm leading-6 text-white/80 md:text-base">
         We use cookies to improve your experience. By continuing, you agree to our
-        <a href="/privacy-policy" className="underline hover:text-[var(--color-soft-pink)] transition-colors"> Privacy Policy</a>.
+        <a href="/privacy-policy" className="font-semibold text-white underline hover:text-[var(--color-warm-gold)] transition-colors"> Privacy Policy</a>.
       </p>
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <button
-          className="bg-[var(--color-soft-blue)] hover:bg-[var(--color-warm-gold)] text-[var(--color-dark-brown)] px-6 py-3 rounded-md transition-all duration-300"
+          className="btn bg-white px-5 py-2 text-[var(--color-ink)] hover:bg-[var(--color-warm-gold)] hover:text-white"
           onClick={acceptCookies}
         >
           Accept
         </button>
         <button
-          className="bg-[var(--color-soft-pink)] hover:bg-[var(--color-muted-gray-brown)] text-white px-6 py-3 rounded-md transition-all duration-300"
+          className="btn border-white/20 bg-transparent px-5 py-2 text-white hover:border-white"
           onClick={declineCookies}
         >
           Decline

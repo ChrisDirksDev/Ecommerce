@@ -32,7 +32,7 @@ describe("Navbar", () => {
   it("renders the logged-out navigation", () => {
     renderNavbar();
 
-    expect(screen.getByRole("link", { name: /ecommerce/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /sweet bites home/i })).toHaveAttribute(
       "href",
       "/"
     );

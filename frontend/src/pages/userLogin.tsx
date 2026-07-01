@@ -41,8 +41,9 @@ const UserLogin = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center bg-[var(--color-light-beige)] px-6">
-      <Card footer={footer} title="Login">
+    <div className="section-shell flex justify-center pt-8">
+      <Card className="max-w-md" footer={footer} title="Welcome back">
+        <p className="mb-6">Sign in to manage orders and continue checkout.</p>
         {error && <p className="text-error text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -61,7 +62,7 @@ const UserLogin = () => {
             required
           />
           <button type="submit" className="btn btn-primary w-full">
-            Login
+            Sign in
           </button>
         </form>
       </Card>
