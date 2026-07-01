@@ -97,20 +97,21 @@ const seed = async () => {
   const croissant = byName.get("Butter Croissant")!;
   const cake = byName.get("Chocolate Ganache Cake")!;
 
-  await Cart.findOneAndUpdate(
-    { user: user._id },
-    {
-      $set: { user: user._id },
-      $unset: { anonId: 1 },
-      $setOnInsert: {
-        items: [
-          { product: bread._id, quantity: 1 },
-          { product: croissant._id, quantity: 2 },
-        ],
-      },
-    },
-    { upsert: true, new: true, runValidators: true }
-  );
+  const cartItems = [
+    { product: bread._id, quantity: 1 },
+    { product: croissant._id, quantity: 2 },
+  ];
+
+  const existingCart = await Cart.findOne({ user: user._id });
+  if (existingCart) {
+    existingCart.set("items", cartItems);
+    await existingCart.save();
+  } else {
+    await Cart.create({
+      user: user._id,
+      items: cartItems,
+    });
+  }
 
   const existingOrder = await Order.exists({ user: user._id });
   if (!existingOrder) {
