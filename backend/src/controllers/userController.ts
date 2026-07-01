@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 
 import { UserRequest } from "../utils/types";
 import { Request, Response } from "express";
-import * as service from "services/userService";
+import * as service from "../services/userService";
 
 /**
  * Handles user sign-up requests.

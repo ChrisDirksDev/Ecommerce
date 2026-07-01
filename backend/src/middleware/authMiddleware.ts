@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import Admin from "../models/adminModel";
-import { IAdmin } from "models";
-import { IUserAuth } from "utils/types";
+import { IAdmin } from "../models";
+import { IUserAuth } from "../utils/types";
 
 export interface AuthRequest extends Request {
   admin?: IAdmin;

@@ -5,13 +5,13 @@ import {
   removeFromCart,
   updateCart,
 } from "../controllers/cartController";
-import { userAuth } from "middleware/authMiddleware";
-import { validateBody, validateParams } from "middleware/validationMiddleware";
+import { userAuth } from "../middleware/authMiddleware";
+import { validateBody, validateParams } from "../middleware/validationMiddleware";
 import {
   cartItemSchema,
   productIdSchema,
   updateCartBodySchema,
-} from "utils/schemas";
+} from "../utils/schemas";
 
 const router = express.Router();
 

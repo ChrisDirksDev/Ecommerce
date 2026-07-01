@@ -1,6 +1,6 @@
-import { Cart, Order } from "models";
-import { orderStatus, paymentStatus } from "utils/types";
-import { AppError } from "utils/error";
+import { Cart, Order } from "../models";
+import { orderStatus, paymentStatus } from "../utils/types";
+import { AppError } from "../utils/error";
 
 export const fetchOrders = async (user: string) => {
   return await Order.find({ user });

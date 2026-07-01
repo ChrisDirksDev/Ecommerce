@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
-import { Cart, IUser, User } from "models";
-import { generateToken } from "utils/func";
-import { AppError } from "utils/error";
-import { IUserAuth } from "utils/types";
+import { Cart, IUser, User } from "../models";
+import { generateToken } from "../utils/func";
+import { AppError } from "../utils/error";
+import { IUserAuth } from "../utils/types";
 import { getCartForUser } from "./cartService";
 
 export const registerUser = async (

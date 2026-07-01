@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import { Admin } from "models";
-import { AppError } from "utils/error";
-import { generateToken } from "utils/func";
+import { Admin } from "../models";
+import { AppError } from "../utils/error";
+import { generateToken } from "../utils/func";
 
 export const registerAdmin = async (
   name: string,

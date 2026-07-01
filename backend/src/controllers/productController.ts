@@ -1,8 +1,8 @@
 import asyncHandler from "express-async-handler";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { Product } from "../models";
-import * as service from "services/productService";
-import { AppError } from "utils/error";
+import * as service from "../services/productService";
+import { AppError } from "../utils/error";
 
 /**
  * Retrieves a paginated list of products.

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { Cart, IProduct } from "models";
-import { userQuery } from "utils/func";
-import { AppError } from "utils/error";
+import { Cart, IProduct } from "../models";
+import { userQuery } from "../utils/func";
+import { AppError } from "../utils/error";
 
 export const fetchCart = async (user: string) => {
   return await getPopulatedCart(user);

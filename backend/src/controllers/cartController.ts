@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { extractUserFromRequest } from "../utils/func";
-import * as service from "services/cartService";
+import * as service from "../services/cartService";
 
 /**
  * Retrieves the cart for the authenticated user.

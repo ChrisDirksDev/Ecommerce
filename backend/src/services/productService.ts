@@ -1,4 +1,4 @@
-import { Product } from "models";
+import { Product } from "../models";
 
 export const fetchProducts = async (skip: number, limit: number) => {
   const products = await Product.find({})

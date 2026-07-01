@@ -6,12 +6,12 @@ import {
   deleteProduct,
   getProductById,
 } from "../controllers/productController";
-import { adminAuth } from "middleware/authMiddleware";
+import { adminAuth } from "../middleware/authMiddleware";
 import {
   validateBody,
   validateParams,
   validateQuery,
-} from "middleware/validationMiddleware";
+} from "../middleware/validationMiddleware";
 import {
   addProductSchema,
   deleteProductSchema,
@@ -19,7 +19,7 @@ import {
   updateProductBodySchema,
   updateProductParamsSchema,
   getProductByIdSchema,
-} from "utils/schemas";
+} from "../utils/schemas";
 
 const router = express.Router();
 

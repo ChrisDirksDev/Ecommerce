@@ -1,8 +1,8 @@
 import asyncHandler from "express-async-handler";
-import { AuthRequest } from "middleware/authMiddleware";
-import { extractUserFromRequest } from "utils/func";
-import * as service from "services/orderService";
-import { AppError } from "utils/error";
+import { AuthRequest } from "../middleware/authMiddleware";
+import { extractUserFromRequest } from "../utils/func";
+import * as service from "../services/orderService";
+import { AppError } from "../utils/error";
 
 // 🔹 Get All Orders for Logged-in User
 export const getOrders = asyncHandler(async (req, res) => {

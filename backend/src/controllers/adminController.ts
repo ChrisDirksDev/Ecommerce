@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import * as service from "services/adminService";
+import * as service from "../services/adminService";
 
 export const registerAdmin = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;

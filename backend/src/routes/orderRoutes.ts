@@ -1,13 +1,13 @@
 import express from "express";
-import { adminAuth, userAuth } from "middleware/authMiddleware";
+import { adminAuth, userAuth } from "../middleware/authMiddleware";
 import {
   getOrders,
   placeOrder,
   getOrderById,
   updateOrderStatus,
 } from "../controllers/orderController";
-import { validateBody, validateParams } from "middleware/validationMiddleware";
-import { orderIdParamsSchema, updateOrderBodySchema } from "utils/schemas";
+import { validateBody, validateParams } from "../middleware/validationMiddleware";
+import { orderIdParamsSchema, updateOrderBodySchema } from "../utils/schemas";
 
 const router = express.Router();
 
